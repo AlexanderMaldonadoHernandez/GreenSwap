@@ -1,6 +1,4 @@
-import React from 'react';
-
-public default function Navbar({ usuario, setUsuario, setPantalla }) {
+export default function Navbar({ usuario, setUsuario, setPantalla }) {
   return (
     <nav className="navbar">
       <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => setPantalla(usuario ? 'catalogo' : 'login')}>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-public default function Panel({ usuario }) {
+export default function Panel({ usuario }) {
   const [misArticulos, setMisArticulos] = useState([]);
   const [titulo, setTitulo] = useState('');
   const [desc, setDesc] = useState('');

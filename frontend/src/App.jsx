@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Navbar from './components/Navbar';
 import Login from './paginas/Login';
 import Registro from './paginas/Registro';
 import CatalogoMapa from './paginas/CatalogoMapa';
 import Panel from './paginas/Panel';
 
-public default function App() {
+export default function App() {
   const [usuario, setUsuario] = useState(() => {
     const sesionGuardada = localStorage.getItem('usuario');
     return sesionGuardada ? JSON.parse(sesionGuardada) : null;

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-public default function CatalogoMapa() {
+export default function CatalogoMapa() {
   const [articulos, setArticulos] = useState([]);
   const [cat, setCat] = useState('');
   const [proximidad, setProximidad] = useState(false);

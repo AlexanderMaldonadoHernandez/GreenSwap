@@ -2,7 +2,7 @@
 * Java JDK 21
 * Node.js 18 o mayor
 * Git
-* MySQL (Asumiendo que si vamos a ocupar este)
+* MySQL 
 
 ## Instalación del repositorio en tu computadora
 Pon esto en una línea de comandos dentro de la carpeta donde quieres tener descargado el repositorio:
@@ -17,6 +17,15 @@ Para poder conectarse a la base de datos se ejecuta:
 mvnw spring-boot:run
 ~~~
 Recuerda que se debe estar en la carpeta de backend para ejecutar el comando anterior.
+
+### Conexión con la base de datos
+Para que se tenga una conexión exitosa deben tener esto:
+* Nombre de la base de datos: greenswap
+* Contraseña de la base de datos: 1234
+Asumiendo que ya tienen MySQL workbench instalado, deben de poner el siguiente comando para crear la base de datos:
+~~~
+CREATE DATABASE greenswap;
+~~~
 
 ## Levantar el frontend
 Primero que todo debemos estar en la carpeta de frontend:

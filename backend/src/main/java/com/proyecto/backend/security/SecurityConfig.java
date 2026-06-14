@@ -22,8 +22,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configure(http))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Rutas públicas
-                        .anyRequest().authenticated() // El resto requiere token
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/articulos/**").permitAll()
+                        .anyRequest().permitAll()
                 );
 
         return http.build();

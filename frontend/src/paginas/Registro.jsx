@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
-export default function Registro({ setPantalla }) {
+export default function Registro() {
+  const navigate = useNavigate();
+
   const [nombre, setNombre] = useState('');
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
@@ -55,7 +58,7 @@ export default function Registro({ setPantalla }) {
         setSuccess(data.mensaje || '¡Cuenta de E-Block/GreenSwap creada con éxito!');
 
         setTimeout(() => {
-          setPantalla('login');
+          navigate('/login');
         }, 2000);
       })
       .catch(err => {
@@ -164,16 +167,7 @@ export default function Registro({ setPantalla }) {
         </form>
 
         <p style={{ textAlign: 'center', fontSize: '0.9rem', marginTop: '1.2rem' }}>
-          ¿Ya tienes cuenta?{' '}
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              setPantalla('login');
-            }}
-          >
-            Inicia sesión aquí
-          </a>
+          ¿Ya tienes cuenta? <Link to="/login">Inicia sesión aquí</Link>
         </p>
       </div>
     </div>

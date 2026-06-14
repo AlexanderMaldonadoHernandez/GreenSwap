@@ -1,4 +1,6 @@
-export default function Navbar({ usuario, setUsuario, setPantalla }) {
+import { NavLink, useNavigate } from 'react-router-dom';
+export default function Navbar({ usuario, setUsuario}) {
+  const navigate = useNavigate();
   const cerrarSesion = (e) => {
     e.preventDefault();
 
@@ -6,12 +8,7 @@ export default function Navbar({ usuario, setUsuario, setPantalla }) {
     localStorage.removeItem('greenswap_token');
 
     setUsuario(null);
-    setPantalla('login');
-  };
-
-  const irA = (e, pantalla) => {
-    e.preventDefault();
-    setPantalla(pantalla);
+    navigate('/login');
   };
 
   return (
@@ -23,7 +20,7 @@ export default function Navbar({ usuario, setUsuario, setPantalla }) {
           lineHeight: '1.1',
           cursor: 'pointer'
         }}
-        onClick={() => setPantalla(usuario ? 'catalogo' : 'login')}
+        onClick={() => navigate(usuario ? 'catalogo' : 'login')}
       >
         <strong style={{ fontSize: '1.45rem' }}>♻️ GreenSwap</strong>
         <span style={{ fontSize: '0.75rem', color: '#d8f5dc', marginLeft: '30px' }}>
@@ -38,13 +35,13 @@ export default function Navbar({ usuario, setUsuario, setPantalla }) {
               Hola, <b>{usuario.nombre || usuario.nombreCompleto || 'usuario'}</b>
             </span>
 
-            <a href="#" onClick={(e) => irA(e, 'catalogo')}>
+            <NavLink to="/catalogo">
               Catálogo Radar
-            </a>
+            </NavLink>
 
-            <a href="#" onClick={(e) => irA(e, 'panel')}>
+            <NavLink to="/panel">
               Mi Panel
-            </a>
+            </NavLink>
 
             <a href="#" className="btn-salir" onClick={cerrarSesion}>
               Salir
@@ -52,13 +49,13 @@ export default function Navbar({ usuario, setUsuario, setPantalla }) {
           </>
         ) : (
           <>
-            <a href="#" onClick={(e) => irA(e, 'login')}>
+            <NavLink to="/login">
               Entrar
-            </a>
+            </NavLink>
 
-            <a href="#" onClick={(e) => irA(e, 'registro')}>
+            <NavLink to="/registro">
               Registrarse
-            </a>
+            </NavLink>
           </>
         )}
       </div>

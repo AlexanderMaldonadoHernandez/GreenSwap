@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
-export default function Login({ setUsuario, setPantalla }) {
+export default function Login({ setUsuario}) {
+  const navigate = useNavigate();
+
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(''); // Estado para manejar errores sin usar alert()
@@ -33,7 +36,7 @@ export default function Login({ setUsuario, setPantalla }) {
 
           // 3. Actualizamos los estados de la aplicación
           setUsuario(data.usuario);
-          setPantalla('catalogo');
+          Navigate('/catalogo');
         })
         .catch((err) => {
           // Mostramos el error en la interfaz en lugar de un alert
@@ -67,7 +70,7 @@ export default function Login({ setUsuario, setPantalla }) {
             </button>
           </form>
           <p style={{ textAlign: 'center', fontSize: '0.9rem', marginTop: '1.2rem' }}>
-            ¿No tienes cuenta? <a href="#" onClick={(e) => { e.preventDefault(); setPantalla('registro'); }}>Crea una aquí</a>
+            ¿No tienes cuenta? <Link to="registro">Crea una aquí</Link>
           </p>
         </div>
       </div>

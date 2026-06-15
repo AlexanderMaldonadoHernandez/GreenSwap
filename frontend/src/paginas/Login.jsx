@@ -72,7 +72,7 @@ export default function Login({ setUsuario}) {
 
           <div style={{ marginTop: '1.5rem' }}>
             <p style={{ textAlign: 'center', fontSize: '0.9rem', margin: '0.5rem 0' }}>
-              ¿No tienes cuenta? <Link to="/registro">Crea una aquí</Link>
+              ¿No tienes cuenta? <Link to="/registro" style={{ color: '#2e7d32', fontWeight: 'bold' }}>Crea una aquí</Link>
             </p>
             <p style={{ textAlign: 'center', fontSize: '0.9rem', margin: '0.5rem 0' }}>
               ¿Olvidaste tu contraseña? <Link to="/recuperar" style={{ color: '#2e7d32', fontWeight: 'bold' }}>Recupérala aquí</Link>

@@ -26,6 +26,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/articulos/**").permitAll()
                         .requestMatchers("/api/admin/**").permitAll()
                         .requestMatchers("/api/solicitudes/**").permitAll()
+                        .requestMatchers("/api/chat/**").permitAll()
+                        .requestMatchers("/api/upload/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .anyRequest().permitAll()
                 );
 

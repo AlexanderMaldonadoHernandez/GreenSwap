@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Chat from '../components/Chat';
 
 const ESTADOS_COLOR = {
   PENDIENTE: { bg: '#fff8e1', color: '#f57f17', label: 'Pendiente' },
@@ -32,6 +33,7 @@ export default function PanelAdmin() {
   };
 
   useEffect(() => { if (seccion === 'intercambios') cargarIntercambios(filtroIntercambio); }, [seccion, filtroIntercambio]);
+
 
   const cargar = () => {
     const url = filtro === 'TODOS'
@@ -209,6 +211,7 @@ export default function PanelAdmin() {
       </div>
 
       </>}
+
 
       {motivoModal && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>

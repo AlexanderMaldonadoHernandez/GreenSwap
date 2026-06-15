@@ -109,42 +109,6 @@ export default function CatalogoMapa() {
       </div>
       {mapaVisible && <MapaArticulos />}
 
-      <div
-        className="card"
-        style={{
-          backgroundColor: '#e8f5e9',
-          marginBottom: '2rem',
-          border: '1px solid #c8e6c9'
-        }}
-      >
-        <h3 style={{ color: '#2e7d32', margin: '0 0 5px 0' }}>
-          Radar Geográfico (Zona Zacatenco)
-        </h3>
-
-        <p style={{ fontSize: '0.9rem', margin: '0 0 10px 0', color: '#555' }}>
-          Filtra las publicaciones en tiempo real por proximidad física.
-        </p>
-
-        <label
-          style={{
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={proximidad}
-            onChange={e => {
-              setProximidad(e.target.checked);
-              setCat('');
-            }}
-          />
-          Mostrar solo artículos a menos de 5 km de ESCOM / IPN
-        </label>
-      </div>
 
       <div
         style={{

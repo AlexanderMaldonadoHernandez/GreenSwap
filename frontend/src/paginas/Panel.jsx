@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import Chat from '../components/Chat';
 
 export default function Panel({ usuario }) {
   const [tab, setTab] = useState('publicaciones');
@@ -10,6 +11,7 @@ export default function Panel({ usuario }) {
   const [estado, setEstado] = useState('Nuevo');
   const [cat, setCat] = useState('1');
   const [imgUrl, setImgUrl] = useState('');
+  const [subiendoImagen, setSubiendoImagen] = useState(false);
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
 
@@ -169,13 +171,36 @@ export default function Panel({ usuario }) {
           </div>
 
           <div className="form-group">
-            <label>URL de Foto:</label>
+            <label>Foto del artículo (JPG o PNG):</label>
             <input
-              type="text"
-              value={imgUrl}
-              onChange={e => setImgUrl(e.target.value)}
-              placeholder="https://..."
+              type="file"
+              accept="image/jpeg,image/png"
+              onChange={async e => {
+                const archivo = e.target.files[0];
+                if (!archivo) return;
+                setSubiendoImagen(true);
+                const form = new FormData();
+                form.append('archivo', archivo);
+                try {
+                  const res = await fetch('http://localhost:8080/api/upload', { method: 'POST', body: form });
+                  const data = await res.json();
+                  if (data.url) {
+                    setImgUrl(data.url);
+                    setMensaje('Imagen cargada correctamente.');
+                  } else {
+                    setError(data.mensaje || 'Error al subir la imagen.');
+                  }
+                } catch {
+                  setError('No se pudo subir la imagen.');
+                } finally {
+                  setSubiendoImagen(false);
+                }
+              }}
             />
+            {subiendoImagen && <small style={{ color: '#666' }}>Subiendo imagen...</small>}
+            {imgUrl && (
+              <img src={imgUrl} alt="Vista previa" style={{ marginTop: '8px', width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px' }} />
+            )}
           </div>
 
           <div className="form-group">
@@ -240,6 +265,16 @@ export default function Panel({ usuario }) {
                       Confirmar que lo recibí
                     </button>
                   )}
+                  {['ACEPTADA', 'ENTREGADO', 'COMPLETADA'].includes(s.estado) && (
+                    <div style={{ marginTop: '12px' }}>
+                      <Chat
+                        tipo="INTERCAMBIO"
+                        idReferencia={s.idSolicitud}
+                        idUsuarioActual={usuarioId}
+                        titulo={`Chat — ${s.tituloArticulo}`}
+                      />
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -299,6 +334,16 @@ export default function Panel({ usuario }) {
                     <p style={{ margin: '10px 0 0 0', fontSize: '0.85rem', color: '#2e7d32', fontWeight: 'bold' }}>
                       ¡Intercambio completado exitosamente!
                     </p>
+                  )}
+                  {['ACEPTADA', 'ENTREGADO', 'COMPLETADA'].includes(s.estado) && (
+                    <div style={{ marginTop: '12px' }}>
+                      <Chat
+                        tipo="INTERCAMBIO"
+                        idReferencia={s.idSolicitud}
+                        idUsuarioActual={usuarioId}
+                        titulo={`Chat — ${s.tituloArticulo}`}
+                      />
+                    </div>
                   )}
                 </div>
               );

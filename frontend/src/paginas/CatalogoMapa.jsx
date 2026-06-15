@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import MapaArticulos from '../components/MapaArticulos';
 
 export default function CatalogoMapa() {
   const [articulos, setArticulos] = useState([]);
@@ -64,6 +65,8 @@ export default function CatalogoMapa() {
 
   return (
     <div className="container">
+      <MapaArticulos />
+
       <div
         className="card"
         style={{

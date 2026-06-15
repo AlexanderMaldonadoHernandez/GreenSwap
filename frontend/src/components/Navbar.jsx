@@ -53,7 +53,7 @@ export default function Navbar({ usuario, setUsuario}) {
             </span>
 
             <NavLink to="/catalogo">
-              Catálogo Radar
+              Catálogo
             </NavLink>
 
             <NavLink to="/panel">
@@ -62,7 +62,7 @@ export default function Navbar({ usuario, setUsuario}) {
 
             {usuario.rol === 'ADMIN' && (
               <NavLink to="/admin">
-                Panel Admin
+                Panel de administrador
               </NavLink>
             )}
 

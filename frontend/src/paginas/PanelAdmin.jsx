@@ -24,6 +24,7 @@ export default function PanelAdmin() {
   const [motivoModal, setMotivoModal] = useState(null);
   const [motivoTexto, setMotivoTexto] = useState('');
   const [mensaje, setMensaje] = useState('');
+  const [usuarios, setUsuarios] = useState([]);
 
   const cargarIntercambios = (estado = '') => {
     const url = estado
@@ -32,8 +33,42 @@ export default function PanelAdmin() {
     fetch(url).then(r => r.json()).then(setIntercambios).catch(() => setIntercambios([]));
   };
 
-  useEffect(() => { if (seccion === 'intercambios') cargarIntercambios(filtroIntercambio); }, [seccion, filtroIntercambio]);
+  const cargarUsuarios = () => {
+    fetch('http://localhost:8080/api/usuarios', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('greenswap_token')}`
+      }
+    })
+        .then(r => r.json())
+        .then(data => {
+          setUsuarios(Array.isArray(data) ? data : []);
+        })
+        .catch(() => setUsuarios([]));
+  };
 
+  const confirmarEliminarUsuario = (idUsuario) => {
+    if (window.confirm('¿Estás completamente seguro de eliminar a este usuario? Todos sus artículos también serán borrados.')) {
+      fetch(`http://localhost:8080/api/usuarios/${idUsuario}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('greenswap_token')}`
+        }
+      })
+          .then(res => {
+            if (!res.ok) throw new Error('Error al eliminar al usuario');
+            setMensaje('Usuario eliminado exitosamente.');
+            cargarUsuarios();
+          })
+          .catch(err => {
+            alert('Hubo un error al intentar eliminar al usuario.');
+          });
+    }
+  };
+
+  useEffect(() => {
+    if (seccion === 'intercambios') cargarIntercambios(filtroIntercambio);
+    if (seccion === 'usuarios') cargarUsuarios(); // <--- Esta línea es nueva
+  }, [seccion, filtroIntercambio]);
 
   const cargar = () => {
     const url = filtro === 'TODOS'
@@ -104,7 +139,7 @@ export default function PanelAdmin() {
       <h2 style={{ color: '#2e7d32' }}>Panel de Administración</h2>
 
       <div style={{ display: 'flex', gap: '0', marginBottom: '1.5rem', borderBottom: '2px solid #e0e0e0' }}>
-        {[{ key: 'publicaciones', label: 'Publicaciones' }, { key: 'intercambios', label: 'Intercambios' }].map(t => (
+        {[{ key: 'publicaciones', label: 'Publicaciones' }, { key: 'intercambios', label: 'Intercambios' }, { key: 'usuarios', label: 'Usuarios' }].map(t => (
           <button key={t.key} onClick={() => setSeccion(t.key)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '10px 20px', fontWeight: seccion === t.key ? 'bold' : 'normal', color: seccion === t.key ? '#2e7d32' : '#666', borderBottom: seccion === t.key ? '3px solid #2e7d32' : '3px solid transparent', fontSize: '1rem' }}>
             {t.label}
           </button>
@@ -212,6 +247,47 @@ export default function PanelAdmin() {
 
       </>}
 
+      {seccion === 'usuarios' && (
+          <div>
+            {usuarios.length === 0 && (
+                <div className="card" style={{ textAlign: 'center', color: '#666' }}>
+                  No hay usuarios registrados o no se pudo conectar con el servidor.
+                </div>
+            )}
+
+            {usuarios.map(u => (
+                <div className="card" key={u.idUsuario} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', padding: '15px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <h4 style={{ margin: '0 0 5px 0', color: '#1f3b57' }}>{u.nombreCompleto || u.nombre}</h4>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#555' }}><strong>Correo:</strong> {u.correoElectronico || u.correo}</p>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#555' }}><strong>Número:</strong> {u.telefonoContacto || 'No registrado'}</p>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', backgroundColor: u.rol === 'ADMIN' ? '#e3f2fd' : '#f5f5f5', color: u.rol === 'ADMIN' ? '#1565c0' : '#666', fontWeight: 'bold' }}>
+                    Rol: {u.rol || 'USER'}
+                  </span>
+                      {!u.cuentaActiva && (
+                          <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', backgroundColor: '#ffebee', color: '#c62828', fontWeight: 'bold' }}>
+                      Inactivo (Sin validar)
+                    </span>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {/* Deshabilitamos el botón de eliminar si el usuario es otro ADMIN */}
+                    <button
+                        className="btn btn-danger"
+                        onClick={() => confirmarEliminarUsuario(u.idUsuario)}
+                        disabled={u.rol === 'ADMIN'}
+                        style={{ opacity: u.rol === 'ADMIN' ? 0.5 : 1, cursor: u.rol === 'ADMIN' ? 'not-allowed' : 'pointer', margin: 0 }}
+                        title={u.rol === 'ADMIN' ? 'No puedes eliminar a un administrador' : 'Eliminar usuario'}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+            ))}
+          </div>
+      )}
 
       {motivoModal && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>

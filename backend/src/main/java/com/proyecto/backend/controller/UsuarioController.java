@@ -112,4 +112,9 @@ public class UsuarioController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping
+    public ResponseEntity<List<Usuario>> obtenerTodos() {
+        return ResponseEntity.ok(usuarioRepository.findAll());
+    }
 }

@@ -5,8 +5,14 @@ export default function CatalogoMapa() {
   const [articulos, setArticulos] = useState([]);
   const [cat, setCat] = useState('');
   const [proximidad, setProximidad] = useState(false);
+  const [busqueda, setBusqueda] = useState('');
+  const [busquedaActiva, setBusquedaActiva] = useState('');
+  const [mapaVisible, setMapaVisible] = useState(true);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const [mensajeSolicitud, setMensajeSolicitud] = useState('');
+
+  const usuario = (() => { try { return JSON.parse(localStorage.getItem('usuario')); } catch { return null; } })();
 
   // Coordenadas fijas del campus IPN Zacatenco
   const LAT_ZACATENCO = 19.5046;
@@ -28,6 +34,8 @@ export default function CatalogoMapa() {
 
     if (proximidad) {
       url = `http://localhost:8080/api/articulos/cercanos?lat=${LAT_ZACATENCO}&lng=${LNG_ZACATENCO}&radio=5.0`;
+    } else if (busquedaActiva) {
+      url += `?busqueda=${encodeURIComponent(busquedaActiva)}`;
     } else if (cat) {
       url += `?categoriaId=${cat}`;
     }
@@ -57,15 +65,49 @@ export default function CatalogoMapa() {
       .finally(() => {
         setCargando(false);
       });
-  }, [cat, proximidad]);
+  }, [cat, proximidad, busquedaActiva]);
 
   const manejarErrorImagen = (e) => {
     e.target.src = imagenDefault;
   };
 
+  const handleMeInteresa = (art) => {
+    if (!usuario) {
+      setMensajeSolicitud('Debes iniciar sesión para solicitar un artículo.');
+      return;
+    }
+    fetch('http://localhost:8080/api/solicitudes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idArticulo: art.idArticulo, idUsuarioSolicitante: usuario.idUsuario })
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.mensaje) {
+          setMensajeSolicitud(data.mensaje);
+        } else {
+          setMensajeSolicitud(`Solicitud enviada para "${art.tituloArticulo}". El propietario se pondrá en contacto contigo.`);
+        }
+      })
+      .catch(() => setMensajeSolicitud('No se pudo enviar la solicitud. Intenta de nuevo.'));
+  };
+
   return (
     <div className="container">
-      <MapaArticulos />
+      {mensajeSolicitud && (
+        <div style={{ backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '12px', borderRadius: '6px', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>{mensajeSolicitud}</span>
+          <button onClick={() => setMensajeSolicitud('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem' }}>✕</button>
+        </div>
+      )}
+      <div
+        onClick={() => setMapaVisible(v => !v)}
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '10px 14px', backgroundColor: '#f1f8f1', borderRadius: mapaVisible ? '10px 10px 0 0' : '10px', border: '1px solid #c8e6c9', marginBottom: mapaVisible ? '0' : '1rem', userSelect: 'none' }}
+      >
+        <span style={{ fontWeight: 'bold', color: '#2e7d32', fontSize: '0.95rem' }}>Mapa / Artículos cerca de ti</span>
+        <span style={{ fontSize: '1.1rem', color: '#2e7d32', transition: 'transform 0.2s', display: 'inline-block', transform: mapaVisible ? 'rotate(0deg)' : 'rotate(-90deg)' }}>▼</span>
+      </div>
+      {mapaVisible && <MapaArticulos />}
 
       <div
         className="card"
@@ -76,7 +118,7 @@ export default function CatalogoMapa() {
         }}
       >
         <h3 style={{ color: '#2e7d32', margin: '0 0 5px 0' }}>
-          🗺️ Radar Geográfico (Zona Zacatenco)
+          Radar Geográfico (Zona Zacatenco)
         </h3>
 
         <p style={{ fontSize: '0.9rem', margin: '0 0 10px 0', color: '#555' }}>
@@ -123,13 +165,22 @@ export default function CatalogoMapa() {
           </p>
         </div>
 
-        <div style={{ width: '240px' }} className="form-group">
+        <form
+          onSubmit={e => { e.preventDefault(); setBusquedaActiva(busqueda); setCat(''); setProximidad(false); }}
+          style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
+        >
+          <input
+            type="text"
+            value={busqueda}
+            onChange={e => { setBusqueda(e.target.value); if (!e.target.value) setBusquedaActiva(''); }}
+            placeholder="Buscar artículo..."
+            style={{ height: '38px', padding: '0 12px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '0.9rem', width: '180px', boxSizing: 'border-box' }}
+          />
+          <button type="submit" className="btn" style={{ height: '38px', padding: '0 16px', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Buscar</button>
           <select
             value={cat}
-            onChange={e => {
-              setCat(e.target.value);
-              setProximidad(false);
-            }}
+            onChange={e => { setCat(e.target.value); setBusqueda(''); setBusquedaActiva(''); setProximidad(false); }}
+            style={{ height: '38px', padding: '0 10px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '0.9rem', backgroundColor: '#fff', cursor: 'pointer' }}
           >
             <option value="">Todas las categorías</option>
             <option value="1">Electrodomésticos</option>
@@ -138,7 +189,7 @@ export default function CatalogoMapa() {
             <option value="4">Cocina</option>
             <option value="5">Decoración</option>
           </select>
-        </div>
+        </form>
       </div>
 
       {cargando && (
@@ -246,12 +297,7 @@ export default function CatalogoMapa() {
                 </p>
               </div>
 
-              <button
-                className="btn"
-                onClick={() =>
-                  alert('¡Solicitud enviada! El propietario se pondrá en contacto contigo pronto.')
-                }
-              >
+              <button className="btn" onClick={() => handleMeInteresa(art)}>
                 Me interesa
               </button>
             </div>

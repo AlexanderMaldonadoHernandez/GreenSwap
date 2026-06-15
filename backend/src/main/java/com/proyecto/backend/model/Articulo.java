@@ -17,13 +17,14 @@ public class Articulo {
     private String urlImagen;
     private Long idUsuarioPropietario;
     private Long idCategoria;
+    private String estadoPublicacion = "PENDIENTE";
+    private String motivoRechazo;
 
     public Articulo() {}
     public Long getIdArticulo() { return idArticulo; }
     public void setIdArticulo(Long id) { this.idArticulo = id; }
     public String getTituloArticulo() { return tituloArticulo; }
     public void setTituloArticulo(String t) { this.tituloArticulo = t; }
-    public String get遊戏() { return descripcionDetallada; }
     public String getDescripcionDetallada() { return descripcionDetallada; }
     public void setDescripcionDetallada(String d) { this.descripcionDetallada = d; }
     public String getEstadoConservacion() { return estadoConservacion; }
@@ -40,4 +41,8 @@ public class Articulo {
     public void setIdUsuarioPropietario(Long id) { this.idUsuarioPropietario = id; }
     public Long getIdCategoria() { return idCategoria; }
     public void setIdCategoria(Long id) { this.idCategoria = id; }
+    public String getEstadoPublicacion() { return estadoPublicacion; }
+    public void setEstadoPublicacion(String e) { this.estadoPublicacion = e; }
+    public String getMotivoRechazo() { return motivoRechazo; }
+    public void setMotivoRechazo(String m) { this.motivoRechazo = m; }
 }

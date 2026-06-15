@@ -5,7 +5,9 @@ import com.proyecto.backend.repository.ArticuloRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/articulos")
@@ -18,15 +20,21 @@ public class ArticuloController {
     @PostMapping
     public Articulo crear(@RequestBody Articulo articulo) {
         articulo.setDisponible(true);
+        articulo.setEstadoPublicacion("PENDIENTE");
         return articuloRepository.save(articulo);
     }
 
     @GetMapping
-    public List<Articulo> listar(@RequestParam(required = false) Long categoriaId) {
-        if(categoriaId != null) {
-            return articuloRepository.findByIdCategoriaAndDisponibleTrue(categoriaId);
+    public List<Articulo> listar(
+            @RequestParam(required = false) Long categoriaId,
+            @RequestParam(required = false) String busqueda) {
+        if (busqueda != null && !busqueda.isBlank()) {
+            return articuloRepository.buscarPorTexto(busqueda.trim());
         }
-        return articuloRepository.findByDisponibleTrue();
+        if (categoriaId != null) {
+            return articuloRepository.findByIdCategoriaAndDisponibleTrueAndEstadoPublicacion(categoriaId, "APROBADO");
+        }
+        return articuloRepository.findByDisponibleTrueAndEstadoPublicacion("APROBADO");
     }
 
     @GetMapping("/cercanos")
@@ -40,11 +48,13 @@ public class ArticuloController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable Long id) {
-        if(articuloRepository.existsById(id)) {
+    public ResponseEntity<?> eliminar(@PathVariable Long id, @RequestParam Long idUsuario) {
+        return articuloRepository.findById(id).map(art -> {
+            if (!art.getIdUsuarioPropietario().equals(idUsuario)) {
+                return ResponseEntity.status(403).body(Map.of("mensaje", "No tienes permiso para eliminar este artículo."));
+            }
             articuloRepository.deleteById(id);
             return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
+        }).orElse(ResponseEntity.notFound().build());
     }
 }

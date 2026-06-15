@@ -5,6 +5,7 @@ import Login from './paginas/Login';
 import Registro from './paginas/Registro';
 import CatalogoMapa from './paginas/CatalogoMapa';
 import Panel from './paginas/Panel';
+import PanelAdmin from './paginas/PanelAdmin';
 
 export default function App() {
   const [usuario, setUsuario] = useState(() => {
@@ -59,6 +60,17 @@ export default function App() {
             <Panel usuario={usuario} />
           ) : (
             <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/admin"
+        element={
+          usuario?.rol === 'ADMIN' ? (
+            <PanelAdmin />
+          ) : (
+            <Navigate to="/" replace />
           )
         }
       />

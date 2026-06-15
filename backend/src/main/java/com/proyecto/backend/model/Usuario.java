@@ -13,6 +13,7 @@ public class Usuario {
     private String correoElectronico;
     private String passwordHash;
     private String telefonoContacto;
+    private String rol = "USUARIO";
 
     public Usuario() {}
     public Long getIdUsuario() { return idUsuario; }
@@ -25,4 +26,6 @@ public class Usuario {
     public void setPasswordHash(String p) { this.passwordHash = p; }
     public String getTelefonoContacto() { return telefonoContacto; }
     public void setTelefonoContacto(String t) { this.telefonoContacto = t; }
+    public String getRol() { return rol; }
+    public void setRol(String r) { this.rol = r; }
 }

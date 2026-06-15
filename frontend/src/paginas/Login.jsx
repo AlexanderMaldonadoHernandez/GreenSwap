@@ -36,7 +36,7 @@ export default function Login({ setUsuario}) {
 
           // 3. Actualizamos los estados de la aplicación
           setUsuario(data.usuario);
-          Navigate('/catalogo');
+          navigate('/catalogo');
         })
         .catch((err) => {
           // Mostramos el error en la interfaz en lugar de un alert
@@ -66,11 +66,11 @@ export default function Login({ setUsuario}) {
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
             </div>
             <button type="submit" className="btn" style={{ width: '100%', marginTop: '1rem' }}>
-              Entrar al Sistema
+              Iniciar Sesión
             </button>
           </form>
           <p style={{ textAlign: 'center', fontSize: '0.9rem', marginTop: '1.2rem' }}>
-            ¿No tienes cuenta? <Link to="registro">Crea una aquí</Link>
+            ¿No tienes cuenta? <Link to="/registro">Crea una aquí</Link>
           </p>
         </div>
       </div>

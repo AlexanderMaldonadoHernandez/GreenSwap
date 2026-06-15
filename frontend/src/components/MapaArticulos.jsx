@@ -115,17 +115,6 @@ export default function MapaArticulos() {
         overflow: 'hidden'
       }}
     >
-      <div style={{ padding: '1.2rem 1.2rem 0.8rem' }}>
-        <h3 style={{ margin: '0 0 5px 0', color: '#2e7d32' }}>
-          Mapa / Articulos cerca de ti
-        </h3>
-        <p style={{ margin: 0, color: '#666', fontSize: '0.95rem' }}>
-          {ubicacionDetectada
-            ? 'Ubicacion detectada correctamente.'
-            : 'Usando ubicacion aproximada cerca de IPN Zacatenco.'}
-        </p>
-      </div>
-
       <MapContainer
         center={ubicacionUsuario}
         zoom={15}

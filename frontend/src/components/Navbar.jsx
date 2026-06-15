@@ -20,7 +20,7 @@ export default function Navbar({ usuario, setUsuario}) {
           lineHeight: '1.1',
           cursor: 'pointer'
         }}
-        onClick={() => navigate(usuario ? 'catalogo' : 'login')}
+        onClick={() => navigate(usuario ? '/catalogo' : '/login')}
       >
         <strong style={{ fontSize: '1.45rem' }}>♻️ GreenSwap</strong>
         <span style={{ fontSize: '0.75rem', color: '#d8f5dc', marginLeft: '30px' }}>
@@ -42,6 +42,12 @@ export default function Navbar({ usuario, setUsuario}) {
             <NavLink to="/panel">
               Mi Panel
             </NavLink>
+
+            {usuario.rol === 'ADMIN' && (
+              <NavLink to="/admin">
+                Panel Admin
+              </NavLink>
+            )}
 
             <a href="#" className="btn-salir" onClick={cerrarSesion}>
               Salir

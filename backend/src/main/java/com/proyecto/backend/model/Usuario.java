@@ -14,6 +14,8 @@ public class Usuario {
     private String passwordHash;
     private String telefonoContacto;
     private String rol = "USUARIO";
+    @Column(length = 6)
+    private String codigoRecuperacion;
 
     public Usuario() {}
     public Long getIdUsuario() { return idUsuario; }
@@ -28,4 +30,6 @@ public class Usuario {
     public void setTelefonoContacto(String t) { this.telefonoContacto = t; }
     public String getRol() { return rol; }
     public void setRol(String r) { this.rol = r; }
+    public String getCodigoRecuperacion() { return codigoRecuperacion; }
+    public void setCodigoRecuperacion(String codigo) { this.codigoRecuperacion = codigo; }
 }

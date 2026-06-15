@@ -6,6 +6,7 @@ import Registro from './paginas/Registro';
 import CatalogoMapa from './paginas/CatalogoMapa';
 import Panel from './paginas/Panel';
 import PanelAdmin from './paginas/PanelAdmin';
+import RecuperarPassword from './paginas/RecuperarPassword';
 
 export default function App() {
   const [usuario, setUsuario] = useState(() => {
@@ -49,6 +50,17 @@ export default function App() {
             <Registro />
           )
         }
+      />
+
+      <Route
+          path="/recuperar"
+          element={
+              usuario ? (
+                  <Navigate to="/catalogo" replace />
+              ) : (
+                  <RecuperarPassword />
+              )
+          }
       />
 
       <Route path="/catalogo" element={<CatalogoMapa />} />

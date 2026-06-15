@@ -69,9 +69,15 @@ export default function Login({ setUsuario}) {
               Iniciar Sesión
             </button>
           </form>
-          <p style={{ textAlign: 'center', fontSize: '0.9rem', marginTop: '1.2rem' }}>
-            ¿No tienes cuenta? <Link to="/registro">Crea una aquí</Link>
-          </p>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <p style={{ textAlign: 'center', fontSize: '0.9rem', margin: '0.5rem 0' }}>
+              ¿No tienes cuenta? <Link to="/registro">Crea una aquí</Link>
+            </p>
+            <p style={{ textAlign: 'center', fontSize: '0.9rem', margin: '0.5rem 0' }}>
+              ¿Olvidaste tu contraseña? <Link to="/recuperar" style={{ color: '#2e7d32', fontWeight: 'bold' }}>Recupérala aquí</Link>
+            </p>
+          </div>
         </div>
       </div>
   );

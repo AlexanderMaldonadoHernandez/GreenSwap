@@ -8,6 +8,7 @@ import CatalogoMapa from './paginas/CatalogoMapa';
 import Panel from './paginas/Panel';
 import PanelAdmin from './paginas/PanelAdmin';
 import RecuperarPassword from './paginas/RecuperarPassword';
+import Perfil from "./paginas/Perfil.jsx";
 
 export default function App() {
   const [usuario, setUsuario] = useState(() => {
@@ -83,6 +84,17 @@ export default function App() {
             <Navigate to="/" replace />
           )
         }
+      />
+
+      <Route
+          path="/perfil"
+          element={
+              usuario ? (
+                  <Perfil usuario={usuario} setUsuario={setUsuario} />
+              ) : (
+                  <Navigate to="/login" replace />
+              )
+          }
       />
 
       <Route path="*" element={<Navigate to="/" replace />} />

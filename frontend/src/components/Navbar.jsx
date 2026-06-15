@@ -66,6 +66,10 @@ export default function Navbar({ usuario, setUsuario}) {
               </NavLink>
             )}
 
+              <NavLink to="/perfil">
+                  Perfil
+              </NavLink>
+
             <a href="#" className="btn-salir" onClick={cerrarSesion}>
               Salir
             </a>

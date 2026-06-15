@@ -83,10 +83,18 @@ public class AuthController {
         // Encriptamos la contraseña antes de guardar al usuario en la BD
         usuario.setPasswordHash(passwordEncoder.encode(usuario.getPasswordHash()));
 
+        // Lógica de validación de correo
+        usuario.setCuentaActiva(false);
+        String token = java.util.UUID.randomUUID().toString();
+        usuario.setTokenActivacion(token);
+
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
 
+        // Enviamos el correo de activación
+        emailService.enviarCorreoActivacion(usuarioGuardado.getCorreoElectronico(), token);
+
         return ResponseEntity.ok(Map.of(
-                "mensaje", "Usuario registrado con éxito",
+                "mensaje", "Registro exitoso. Revisa tu bandeja de entrada o SPAM para activar tu cuenta.",
                 "usuario", Map.of(
                         "idUsuario", usuarioGuardado.getIdUsuario(),
                         "nombre", usuarioGuardado.getNombreCompleto(),
@@ -95,27 +103,53 @@ public class AuthController {
         ));
     }
 
+    @GetMapping("/activar")
+    public ResponseEntity<String> activarCuenta(@RequestParam String token) {
+        Optional<Usuario> userOpt = usuarioRepository.findByTokenActivacion(token);
+
+        if(userOpt.isPresent()) {
+            Usuario usuario = userOpt.get();
+            usuario.setCuentaActiva(true); // Se activa el acceso
+            usuario.setTokenActivacion(null); // Se quema el token
+            usuarioRepository.save(usuario);
+
+            return ResponseEntity.ok("<div style='font-family: sans-serif; text-align: center; margin-top: 50px;'><h1 style='color: #2e7d32;'>Cuenta activada exitosamente</h1><p>Ya puedes cerrar esta pestaña e iniciar sesión en GreenSwap.</p></div>");
+        }
+
+        return ResponseEntity.badRequest().body("<div style='font-family: sans-serif; text-align: center; margin-top: 50px;'><h1 style='color: #c62828;'>Error de Activación</h1><p>El enlace es inválido o la cuenta ya fue activada previamente.</p></div>");
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Usuario req) {
 
         Optional<Usuario> userOpt = usuarioRepository.findByCorreoElectronico(req.getCorreoElectronico());
 
-        if (userOpt.isPresent() && passwordEncoder.matches(req.getPasswordHash(), userOpt.get().getPasswordHash())) {
-
+        if (userOpt.isPresent()) {
             Usuario usuarioEncontrado = userOpt.get();
 
-            // Generamos el token JWT si el login es correcto
-            String token = jwtUtil.generateToken(usuarioEncontrado.getCorreoElectronico());
+            // Bloqueo estricto si la cuenta no ha sido verificada por correo
+            if (!usuarioEncontrado.isCuentaActiva()) {
+                return ResponseEntity.status(401).body(
+                        Map.of("mensaje", "Error: Debes activar tu cuenta revisando el enlace en tu correo electrónico antes de iniciar sesión.")
+                );
+            }
 
-            return ResponseEntity.ok(Map.of(
-                    "token", token,
-                    "usuario", Map.of(
-                            "idUsuario", usuarioEncontrado.getIdUsuario(),
-                            "nombre", usuarioEncontrado.getNombreCompleto(),
-                            "correo", usuarioEncontrado.getCorreoElectronico(),
-                            "rol", usuarioEncontrado.getRol()
-                    )
-            ));
+            // Validación de contraseña
+            if (passwordEncoder.matches(req.getPasswordHash(), usuarioEncontrado.getPasswordHash())) {
+
+                // Generamos el token JWT si el login es correcto
+                String token = jwtUtil.generateToken(usuarioEncontrado.getCorreoElectronico());
+
+                return ResponseEntity.ok(Map.of(
+                        "token", token,
+                        "usuario", Map.of(
+                                "idUsuario", usuarioEncontrado.getIdUsuario(),
+                                "nombre", usuarioEncontrado.getNombreCompleto(),
+                                "correo", usuarioEncontrado.getCorreoElectronico(),
+                                "rol", usuarioEncontrado.getRol()
+                        )
+                ));
+            }
         }
 
         return ResponseEntity.status(401).body(

@@ -16,6 +16,7 @@ public class Usuario {
     private String rol = "USUARIO";
     @Column(length = 6)
     private String codigoRecuperacion;
+    private String tokenActivacion;
 
     public Usuario() {}
     public Long getIdUsuario() { return idUsuario; }
@@ -32,4 +33,9 @@ public class Usuario {
     public void setRol(String r) { this.rol = r; }
     public String getCodigoRecuperacion() { return codigoRecuperacion; }
     public void setCodigoRecuperacion(String codigo) { this.codigoRecuperacion = codigo; }
+    private boolean cuentaActiva = false;
+    public boolean isCuentaActiva() { return cuentaActiva; }
+    public void setCuentaActiva(boolean cuentaActiva) { this.cuentaActiva = cuentaActiva; }
+    public String getTokenActivacion() { return tokenActivacion; }
+    public void setTokenActivacion(String tokenActivacion) { this.tokenActivacion = tokenActivacion; }
 }

@@ -1,6 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+import logo from '../assets/greenswap-logo.png';
+
 export default function Navbar({ usuario, setUsuario}) {
   const navigate = useNavigate();
+
   const cerrarSesion = (e) => {
     e.preventDefault();
 
@@ -16,16 +19,30 @@ export default function Navbar({ usuario, setUsuario}) {
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          lineHeight: '1.1',
+          alignItems: 'center',
+          gap: '10px',
           cursor: 'pointer'
         }}
-        onClick={() => navigate(usuario ? '/catalogo' : '/login')}
+        onClick={() => navigate('/')}
       >
-        <strong style={{ fontSize: '1.45rem' }}>♻️ GreenSwap</strong>
-        <span style={{ fontSize: '0.75rem', color: '#d8f5dc', marginLeft: '30px' }}>
-          Soluciones limpias, sistemas robustos
-        </span>
+        <img
+          src={logo}
+          alt="GreenSwap"
+          style={{
+            width: '42px',
+            height: '42px',
+            objectFit: 'contain',
+            background: 'white',
+            borderRadius: '6px',
+            padding: '3px'
+          }}
+        />
+        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.1' }}>
+          <strong style={{ fontSize: '1.45rem' }}>GreenSwap</strong>
+          <span style={{ fontSize: '0.75rem', color: '#d8f5dc' }}>
+            Soluciones limpias, sistemas robustos
+          </span>
+        </div>
       </div>
 
       <div className="nav-links">
@@ -55,6 +72,10 @@ export default function Navbar({ usuario, setUsuario}) {
           </>
         ) : (
           <>
+            <NavLink to="/">
+              Inicio
+            </NavLink>
+
             <NavLink to="/login">
               Entrar
             </NavLink>

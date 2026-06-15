@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Login from './paginas/Login';
 import Registro from './paginas/Registro';
+import Inicio from './paginas/Inicio';
 import CatalogoMapa from './paginas/CatalogoMapa';
 import Panel from './paginas/Panel';
 import PanelAdmin from './paginas/PanelAdmin';
@@ -25,10 +26,7 @@ export default function App() {
       <Navbar usuario={usuario} setUsuario={setUsuario} />
 
       <Routes>
-      <Route
-        path="/"
-        element={<Navigate to={usuario ? '/catalogo' : '/login'} replace />}
-      />
+      <Route path="/" element={<Inicio usuario={usuario} />} />
 
       <Route
         path="/login"

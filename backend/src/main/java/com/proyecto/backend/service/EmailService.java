@@ -8,6 +8,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import java.io.UnsupportedEncodingException;
 
 @Service
 public class EmailService {
@@ -18,11 +19,15 @@ public class EmailService {
     @Value("${app.backend.url}")
     private String backendUrl;
 
+    @Value("${spring.mail.username}")
+    private String correoRemitente;
+
     public void enviarCorreoActivacion(String destino, String token) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
+            helper.setFrom(correoRemitente, "El equipo de GreenSwap");
             helper.setTo(destino);
             helper.setSubject("Activa tu cuenta - GreenSwap");
 
@@ -50,7 +55,7 @@ public class EmailService {
 
             mailSender.send(message);
 
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
@@ -60,6 +65,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
+            helper.setFrom(correoRemitente, "El equipo de GreenSwap");
             helper.setTo(destino);
             helper.setSubject("Código de recuperación - GreenSwap");
 
@@ -85,7 +91,7 @@ public class EmailService {
 
             mailSender.send(message);
 
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }

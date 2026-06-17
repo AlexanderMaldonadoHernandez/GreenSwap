@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 export default function Perfil({ usuario, setUsuario }) {
     const navigate = useNavigate();
 
+    const idToUse = usuario?.idUsuario || usuario?.id_usuario || usuario?.id;
+
     const [editando, setEditando] = useState(false);
     const [nombre, setNombre] = useState(usuario?.nombre || usuario?.nombreCompleto || '');
     const [correo, setCorreo] = useState(usuario?.correo || usuario?.correoElectronico || '');
@@ -30,13 +32,19 @@ export default function Perfil({ usuario, setUsuario }) {
         e.preventDefault();
         setMensaje(''); setError(''); setCargando(true);
 
+        if (!idToUse) {
+            setError('Error interno: No se pudo localizar el ID del usuario.');
+            setCargando(false);
+            return;
+        }
+
         if (telefono && telefono.length > 0 && telefono.length !== 10) {
             setError('El teléfono celular debe contener exactamente 10 dígitos.');
             setCargando(false);
             return;
         }
 
-        fetch(`http://localhost:8080/api/usuarios/${usuario.idUsuario}`, {
+        fetch(`http://localhost:8080/api/usuarios/${idToUse}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -50,7 +58,7 @@ export default function Perfil({ usuario, setUsuario }) {
         })
             .then(async res => {
                 const data = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(data.mensaje || 'Error al actualizar el perfil.');
+                if (!res.ok) throw new Error(data.mensaje || 'Error al actualizar el perfil. Verifica tus datos o tu conexión.');
                 return data;
             })
             .then(data => {
@@ -85,6 +93,11 @@ export default function Perfil({ usuario, setUsuario }) {
         e.preventDefault();
         setErrorPass('');
 
+        if (!idToUse) {
+            setErrorPass('Error interno: No se pudo localizar el ID del usuario.');
+            return;
+        }
+
         if (passNueva !== passConfirm) {
             setErrorPass('La nueva contraseña y la confirmación no coinciden.');
             return;
@@ -97,8 +110,7 @@ export default function Perfil({ usuario, setUsuario }) {
 
         setCargando(true);
 
-        // Nuevo endpoint para actualizar contraseña
-        fetch(`http://localhost:8080/api/usuarios/${usuario.idUsuario}/password`, {
+        fetch(`http://localhost:8080/api/usuarios/${idToUse}/password`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -111,7 +123,7 @@ export default function Perfil({ usuario, setUsuario }) {
         })
             .then(async res => {
                 const data = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(data.mensaje || 'Error al cambiar la contraseña.');
+                if (!res.ok) throw new Error(data.mensaje || 'Error al cambiar la contraseña. Verifica tu contraseña actual.');
                 return data;
             })
             .then(() => {
@@ -135,13 +147,18 @@ export default function Perfil({ usuario, setUsuario }) {
     };
 
     const handleEliminar = () => {
+        if (!idToUse) {
+            setError('Error interno: No se pudo localizar el ID del usuario.');
+            return;
+        }
+
         const confirmar = window.confirm(
             "¿Estás completamente seguro de que deseas eliminar tu cuenta? Esta acción es irreversible y perderás todos tus artículos."
         );
 
         if (confirmar) {
             setCargando(true);
-            fetch(`http://localhost:8080/api/usuarios/${usuario.idUsuario}`, {
+            fetch(`http://localhost:8080/api/usuarios/${idToUse}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('greenswap_token')}`
@@ -207,10 +224,10 @@ export default function Perfil({ usuario, setUsuario }) {
 
                     {editando ? (
                         <div style={{ display: 'flex', gap: '10px', marginTop: '1.5rem' }}>
-                            <button type="submit" className="btn" style={{ flex: 1 }} disabled={cargando}>
+                            <button key="btn-guardar" type="submit" className="btn" style={{ flex: 1 }} disabled={cargando}>
                                 {cargando ? 'Guardando...' : 'Guardar Cambios'}
                             </button>
-                            <button type="button" className="btn" style={{ flex: 1, backgroundColor: '#757575' }} onClick={() => {
+                            <button key="btn-cancelar" type="button" className="btn" style={{ flex: 1, backgroundColor: '#757575' }} onClick={() => {
                                 setNombre(usuario?.nombre || usuario?.nombreCompleto || '');
                                 setCorreo(usuario?.correo || usuario?.correoElectronico || '');
                                 setTelefono(usuario?.telefonoContacto || usuario?.telefono || '');
@@ -222,10 +239,21 @@ export default function Perfil({ usuario, setUsuario }) {
                         </div>
                     ) : (
                         <div style={{ display: 'flex', gap: '10px', marginTop: '1.5rem' }}>
-                            <button type="button" className="btn" style={{ flex: 1 }} onClick={() => setEditando(true)} disabled={cargando}>
+                            <button
+                                key="btn-editar"
+                                type="button"
+                                className="btn"
+                                style={{ flex: 1 }}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setEditando(true);
+                                }}
+                                disabled={cargando}
+                            >
                                 Editar Perfil
                             </button>
                             <button
+                                key="btn-pass"
                                 type="button"
                                 className="btn"
                                 style={{ flex: 1, backgroundColor: '#1976d2' }}

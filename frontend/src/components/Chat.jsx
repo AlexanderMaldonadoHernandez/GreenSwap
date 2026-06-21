@@ -6,11 +6,18 @@ export default function Chat({ tipo, idReferencia, idUsuarioActual, titulo }) {
   const bottomRef = useRef(null);
   const prevUltimoId = useRef(null);
 
+  // Estados para el reporte
+  const [modalReporte, setModalReporte] = useState(null);
+  const [motivoReporte, setMotivoReporte] = useState('');
+
   const url = tipo === 'INTERCAMBIO'
       ? `http://localhost:8080/api/chat/intercambio/${idReferencia}`
       : `http://localhost:8080/api/chat/soporte/${idReferencia}`;
 
   const token = localStorage.getItem('greenswap_token');
+
+  // ... mantén las funciones cargar(), los useEffect() y enviar() igual ...
+  // (Copia aquí tus funciones de cargar, useEffect y enviar sin cambios)
 
   const cargar = () => {
     fetch(url, {
@@ -54,11 +61,56 @@ export default function Chat({ tipo, idReferencia, idUsuarioActual, titulo }) {
     });
   };
 
+  const enviarReporte = () => {
+    if (!motivoReporte.trim()) return;
+    const usuarioStorage = JSON.parse(localStorage.getItem('usuario'));
+    const nombreActual = usuarioStorage?.nombre || usuarioStorage?.nombreCompleto || "Usuario";
+
+    fetch('http://localhost:8080/api/reportes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        idReportante: idUsuarioActual,
+        nombreReportante: nombreActual,
+        idReportado: modalReporte.idReportado,
+        nombreReportado: modalReporte.nombreReportado,
+        motivo: motivoReporte
+      })
+    }).then(() => {
+      setModalReporte(null);
+      setMotivoReporte('');
+      alert('Reporte enviado correctamente al administrador.');
+    });
+  };
+
   return (
-      <div style={{ border: '1px solid #e0e0e0', borderRadius: '10px', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '350px' }}>
+      <div style={{ position: 'relative', border: '1px solid #e0e0e0', borderRadius: '10px', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '350px' }}>
+        {modalReporte && (
+            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+              <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', width: '85%' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#d32f2f' }}>Reportar a {modalReporte.nombreReportado}</h4>
+                <textarea
+                    rows="3"
+                    placeholder="Escribe la razón del reporte (ej. insultos, spam...)"
+                    style={{ width: '100%', marginBottom: '10px', padding: '8px', boxSizing: 'border-box' }}
+                    value={motivoReporte}
+                    onChange={e => setMotivoReporte(e.target.value)}
+                />
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button onClick={enviarReporte} style={{ flex: 1, background: '#d32f2f', color: '#fff', border: 'none', padding: '8px', borderRadius: '4px', cursor: 'pointer' }}>Enviar Reporte</button>
+                  <button onClick={() => setModalReporte(null)} style={{ flex: 1, background: '#ccc', border: 'none', padding: '8px', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+                </div>
+              </div>
+            </div>
+        )}
+
         <div style={{ backgroundColor: '#2e7d32', color: '#fff', padding: '10px 14px', fontWeight: 'bold', fontSize: '0.9rem' }}>
           {titulo}
         </div>
+
         <div style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', backgroundColor: '#fafafa' }}>
           {mensajes.length === 0 && (
               <p style={{ textAlign: 'center', color: '#aaa', fontSize: '0.85rem', marginTop: '2rem' }}>
@@ -69,7 +121,18 @@ export default function Chat({ tipo, idReferencia, idUsuarioActual, titulo }) {
             const esMio = m.idRemitente === idUsuarioActual;
             return (
                 <div key={m.idMensaje} style={{ display: 'flex', flexDirection: 'column', alignItems: esMio ? 'flex-end' : 'flex-start' }}>
-                  {!esMio && <span style={{ fontSize: '0.72rem', color: '#888', marginBottom: '2px' }}>{m.nombreRemitente}</span>}
+                  {!esMio && (
+                      <span style={{ fontSize: '0.72rem', color: '#888', marginBottom: '2px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      {m.nombreRemitente}
+                        <button
+                            onClick={() => setModalReporte({ idReportado: m.idRemitente, nombreReportado: m.nombreRemitente })}
+                            style={{ background: 'none', border: 'none', color: '#d32f2f', cursor: 'pointer', fontSize: '0.65rem', padding: 0 }}
+                            title="Reportar usuario por abuso de chat"
+                        >
+                        Reportar
+                      </button>
+                    </span>
+                  )}
                   <div style={{
                     maxWidth: '75%', padding: '8px 12px', borderRadius: esMio ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
                     backgroundColor: esMio ? '#2e7d32' : '#fff',
@@ -80,13 +143,14 @@ export default function Chat({ tipo, idReferencia, idUsuarioActual, titulo }) {
                     {m.contenido}
                   </div>
                   <span style={{ fontSize: '0.7rem', color: '#bbb', marginTop: '2px' }}>
-                {new Date(m.fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
-              </span>
+                    {new Date(m.fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
                 </div>
             );
           })}
           <div ref={bottomRef} />
         </div>
+
         <form onSubmit={enviar} style={{ display: 'flex', gap: '8px', padding: '10px', borderTop: '1px solid #e0e0e0', backgroundColor: '#fff' }}>
           <input
               type="text"

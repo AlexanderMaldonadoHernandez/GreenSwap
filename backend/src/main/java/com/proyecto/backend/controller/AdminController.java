@@ -9,7 +9,8 @@ import com.proyecto.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.proyecto.backend.model.Reporte;
+import com.proyecto.backend.repository.ReporteRepository;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,32 @@ public class AdminController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private ReporteRepository reporteRepository;
+
+    @GetMapping("/reportes")
+    public List<Reporte> listarReportesPendientes() {
+        return reporteRepository.findByEstadoOrderByFechaDesc("PENDIENTE");
+    }
+
+    @PutMapping("/reportes/{id}/ignorar")
+    public ResponseEntity<?> ignorarReporte(@PathVariable Long id) {
+        return reporteRepository.findById(id).map(r -> {
+            r.setEstado("IGNORADO");
+            reporteRepository.save(r);
+            return ResponseEntity.ok(Map.of("mensaje", "Reporte ignorado."));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/reportes/{id}/sancionar")
+    public ResponseEntity<?> sancionarReporte(@PathVariable Long id) {
+        return reporteRepository.findById(id).map(r -> {
+            r.setEstado("SANCIONADO");
+            reporteRepository.save(r);
+            return ResponseEntity.ok(Map.of("mensaje", "Reporte procesado y usuario sancionado."));
+        }).orElse(ResponseEntity.notFound().build());
+    }
 
     @GetMapping("/articulos/pendientes")
     public List<Articulo> listarPendientes() {

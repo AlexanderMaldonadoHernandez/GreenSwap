@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Chat from '../components/Chat';
 
 const ESTADOS_COLOR = {
   PENDIENTE: { bg: '#fff8e1', color: '#f57f17', label: 'Pendiente' },
@@ -26,8 +25,18 @@ export default function PanelAdmin() {
   const [motivoTexto, setMotivoTexto] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [usuarios, setUsuarios] = useState([]);
+  const [reportes, setReportes] = useState([]);
 
   const token = localStorage.getItem('greenswap_token');
+
+  const cargarReportes = () => {
+    fetch('http://localhost:8080/api/admin/reportes', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+        .then(r => r.json())
+        .then(data => setReportes(Array.isArray(data) ? data : []))
+        .catch(() => setReportes([]));
+  };
 
   const cargarIntercambios = (estado = '') => {
     const url = estado
@@ -72,6 +81,7 @@ export default function PanelAdmin() {
   useEffect(() => {
     if (seccion === 'intercambios') cargarIntercambios(filtroIntercambio);
     if (seccion === 'usuarios') cargarUsuarios();
+    if (seccion === 'reportes') cargarReportes();
   }, [seccion, filtroIntercambio]);
 
   const cargar = () => {
@@ -147,12 +157,45 @@ export default function PanelAdmin() {
     });
   };
 
+  const ignorarReporte = (id) => {
+    fetch(`http://localhost:8080/api/admin/reportes/${id}/ignorar`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}` }
+    }).then(() => {
+      setMensaje('Reporte ignorado.');
+      cargarReportes();
+    });
+  };
+
+  const eliminarUsuarioReportado = (idReportado, idReporte) => {
+    if (window.confirm('¿Seguro que deseas BORRAR la cuenta del usuario acusado? Se perderán todos sus artículos.')) {
+      fetch(`http://localhost:8080/api/usuarios/${idReportado}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).then(() => {
+        // Una vez borrado el usuario, marcamos el reporte como procesado
+        fetch(`http://localhost:8080/api/admin/reportes/${idReporte}/sancionar`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).then(() => {
+          setMensaje('Usuario eliminado y reporte cerrado correctamente.');
+          cargarReportes();
+        });
+      }).catch(() => alert('Error al borrar la cuenta de usuario.'));
+    }
+  };
+
   return (
       <div className="container">
         <h2 style={{ color: '#2e7d32' }}>Panel de Administración</h2>
 
         <div style={{ display: 'flex', gap: '0', marginBottom: '1.5rem', borderBottom: '2px solid #e0e0e0' }}>
-          {[{ key: 'publicaciones', label: 'Publicaciones' }, { key: 'intercambios', label: 'Intercambios' }, { key: 'usuarios', label: 'Usuarios' }].map(t => (
+          {[
+            { key: 'publicaciones', label: 'Publicaciones' },
+            { key: 'intercambios', label: 'Intercambios' },
+            { key: 'usuarios', label: 'Usuarios' },
+            { key: 'reportes', label: 'Reportes de Chat' }
+          ].map(t => (
               <button key={t.key} onClick={() => setSeccion(t.key)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '10px 20px', fontWeight: seccion === t.key ? 'bold' : 'normal', color: seccion === t.key ? '#2e7d32' : '#666', borderBottom: seccion === t.key ? '3px solid #2e7d32' : '3px solid transparent', fontSize: '1rem' }}>
                 {t.label}
               </button>
@@ -291,6 +334,40 @@ export default function PanelAdmin() {
                           title={u.rol === 'ADMIN' ? 'No puedes eliminar a un administrador' : 'Eliminar usuario'}
                       >
                         Eliminar
+                      </button>
+                    </div>
+                  </div>
+              ))}
+            </div>
+        )}
+
+        {seccion === 'reportes' && (
+            <div>
+              {reportes.length === 0 && (
+                  <div className="card" style={{ textAlign: 'center', color: '#666' }}>
+                    No hay reportes de abuso pendientes.
+                  </div>
+              )}
+              {reportes.map(r => (
+                  <div className="card" key={r.idReporte} style={{ marginBottom: '15px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h4 style={{ margin: '0 0 10px 0', color: '#c62828' }}>⚠️ Reporte de Abuso en Chat</h4>
+                      <span style={{ fontSize: '0.8rem', color: '#888' }}>
+                         {new Date(r.fecha).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div style={{ backgroundColor: '#f9f9f9', padding: '10px', borderRadius: '6px', marginBottom: '10px' }}>
+                      <p style={{ margin: '0 0 5px 0' }}><strong>Acusado:</strong> {r.nombreReportado}</p>
+                      <p style={{ margin: '0 0 5px 0' }}><strong>Reportante:</strong> {r.nombreReportante}</p>
+                      <p style={{ margin: '10px 0 0 0', color: '#333' }}><strong>Motivo dado:</strong> {r.motivo}</p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                      <button className="btn btn-danger" onClick={() => eliminarUsuarioReportado(r.idReportado, r.idReporte)}>
+                        Borrar Cuenta del Acusado
+                      </button>
+                      <button className="btn" style={{ backgroundColor: '#757575' }} onClick={() => ignorarReporte(r.idReporte)}>
+                        Ignorar Reporte (Falso Positivo)
                       </button>
                     </div>
                   </div>

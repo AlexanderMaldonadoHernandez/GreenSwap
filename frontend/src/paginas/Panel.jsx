@@ -90,40 +90,62 @@ export default function Panel({ usuario }) {
       return;
     }
 
-    const nuevo = {
-      tituloArticulo: titulo,
-      descripcionDetallada: desc,
-      estadoConservacion: estado,
-      idCategoria: parseInt(cat),
-      urlImagen: imgUrl || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500',
-      idUsuarioPropietario: usuarioId,
-      latitudUbicacion: 19.5046 + (Math.random() - 0.5) * 0.01,
-      longitudUbicacion: -99.1467 + (Math.random() - 0.5) * 0.01
+    const enviarArticulo = (lat, lng) => {
+      const nuevo = {
+        tituloArticulo: titulo,
+        descripcionDetallada: desc,
+        estadoConservacion: estado,
+        idCategoria: parseInt(cat),
+        urlImagen: imgUrl || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500',
+        idUsuarioPropietario: usuarioId,
+        latitudUbicacion: lat,
+        longitudUbicacion: lng
+      };
+
+      fetch('http://localhost:8080/api/articulos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(nuevo)
+      })
+          .then(res => {
+            if (!res.ok) throw new Error('El artículo no se pudo guardar');
+            return res.json();
+          })
+          .then(() => {
+            setMensaje('¡Artículo publicado con éxito!');
+            setTitulo('');
+            setDesc('');
+            setImgUrl('');
+            cargarMisArticulos();
+          })
+          .catch(error => {
+            console.error(error);
+            setError('No se pudo publicar el artículo. Verifica que la URL de la imagen sea válida e inténtalo de nuevo.');
+          });
     };
 
-    fetch('http://localhost:8080/api/articulos', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(nuevo)
-    })
-        .then(res => {
-          if (!res.ok) throw new Error('El artículo no se pudo guardar');
-          return res.json();
-        })
-        .then(() => {
-          setMensaje('¡Artículo publicado con éxito!');
-          setTitulo('');
-          setDesc('');
-          setImgUrl('');
-          cargarMisArticulos();
-        })
-        .catch(error => {
-          console.error(error);
-          setError('No se pudo publicar el artículo. Verifica que la URL de la imagen sea válida e inténtalo de nuevo.');
-        });
+    if (!navigator.geolocation) {
+      setError('Tu navegador no soporta geolocalización. Usando ubicación predeterminada.');
+      // Coordenadas de Zacatenco por defecto si no hay soporte
+      enviarArticulo(19.5046, -99.1467);
+    } else {
+      setMensaje('Obteniendo tu ubicación exacta para publicar...');
+
+      navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            enviarArticulo(pos.coords.latitude, pos.coords.longitude);
+          },
+          (err) => {
+            setError('No se pudo obtener la ubicación (Permiso denegado o error). Usando ubicación por defecto.');
+            // Coordenadas de Zacatenco por defecto si bloquean el permiso
+            enviarArticulo(19.5046, -99.1467);
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
   };
 
   const handleEliminar = (id) => {

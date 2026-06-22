@@ -100,12 +100,54 @@ export default function CatalogoMapa() {
 
   return (
       <div className="container">
-        {mensajeSolicitud && (
-            <div style={{ backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '12px', borderRadius: '6px', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>{mensajeSolicitud}</span>
-              <button onClick={() => setMensajeSolicitud('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem' }}>✕</button>
-            </div>
-        )}
+          {mensajeSolicitud && (
+              <div style={{
+                  position: 'fixed',
+                  top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundColor: 'rgba(0,0,0,0.6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 9999
+              }}>
+                  <div className="card" style={{
+                      width: '90%',
+                      maxWidth: '400px',
+                      backgroundColor: '#fff',
+                      padding: '2rem',
+                      borderRadius: '12px',
+                      textAlign: 'center',
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+                  }}>
+                      <div style={{ fontSize: '3rem', marginBottom: '10px' }}>
+                          {mensajeSolicitud.includes('Debes iniciar sesión') || mensajeSolicitud.includes('Ya enviaste') || mensajeSolicitud.includes('No puedes solicitar') ? '⚠️' : '✅'}
+                      </div>
+
+                      <h3 style={{
+                          color: mensajeSolicitud.includes('Debes iniciar sesión') || mensajeSolicitud.includes('Ya enviaste') || mensajeSolicitud.includes('No puedes solicitar') ? '#c62828' : '#2e7d32',
+                          marginTop: 0
+                      }}>
+                          {mensajeSolicitud.includes('Debes iniciar sesión') || mensajeSolicitud.includes('Ya enviaste') || mensajeSolicitud.includes('No puedes solicitar') ? 'Aviso' : '¡Éxito!'}
+                      </h3>
+
+                      <p style={{ color: '#555', fontSize: '1.05rem', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+                          {mensajeSolicitud}
+                      </p>
+
+                      <button
+                          className="btn"
+                          style={{
+                              width: '100%',
+                              fontSize: '1rem',
+                              backgroundColor: mensajeSolicitud.includes('Debes iniciar sesión') || mensajeSolicitud.includes('Ya enviaste') || mensajeSolicitud.includes('No puedes solicitar') ? '#c62828' : '#2e7d32'
+                          }}
+                          onClick={() => setMensajeSolicitud('')}
+                      >
+                          Entendido
+                      </button>
+                  </div>
+              </div>
+          )}
 
         <div
             onClick={() => setMapaVisible(v => !v)}

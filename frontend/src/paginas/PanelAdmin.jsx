@@ -194,7 +194,7 @@ export default function PanelAdmin() {
             { key: 'publicaciones', label: 'Publicaciones' },
             { key: 'intercambios', label: 'Intercambios' },
             { key: 'usuarios', label: 'Usuarios' },
-            { key: 'reportes', label: 'Reportes de Chat' }
+            { key: 'reportes', label: 'Reportes de chat' }
           ].map(t => (
               <button key={t.key} onClick={() => setSeccion(t.key)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '10px 20px', fontWeight: seccion === t.key ? 'bold' : 'normal', color: seccion === t.key ? '#2e7d32' : '#666', borderBottom: seccion === t.key ? '3px solid #2e7d32' : '3px solid transparent', fontSize: '1rem' }}>
                 {t.label}
@@ -351,7 +351,7 @@ export default function PanelAdmin() {
               {reportes.map(r => (
                   <div className="card" key={r.idReporte} style={{ marginBottom: '15px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <h4 style={{ margin: '0 0 10px 0', color: '#c62828' }}>⚠️ Reporte de Abuso en Chat</h4>
+                      <h4 style={{ margin: '0 0 10px 0', color: '#c62828' }}>Reporte de abuso en chat</h4>
                       <span style={{ fontSize: '0.8rem', color: '#888' }}>
                          {new Date(r.fecha).toLocaleDateString()}
                       </span>
@@ -364,10 +364,10 @@ export default function PanelAdmin() {
 
                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                       <button className="btn btn-danger" onClick={() => eliminarUsuarioReportado(r.idReportado, r.idReporte)}>
-                        Borrar Cuenta del Acusado
+                        Borrar cuenta del acusado
                       </button>
                       <button className="btn" style={{ backgroundColor: '#757575' }} onClick={() => ignorarReporte(r.idReporte)}>
-                        Ignorar Reporte (Falso Positivo)
+                        Ignorar Reporte
                       </button>
                     </div>
                   </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
-export default function Chat({ tipo, idReferencia, idUsuarioActual, titulo }) {
+export default function Chat({ tipo, idReferencia, idUsuarioActual, titulo, estadoSolicitud }) {
+  const estaBloqueado = estadoSolicitud === 'BLOQUEADO';
   const [mensajes, setMensajes] = useState([]);
   const [texto, setTexto] = useState('');
   const bottomRef = useRef(null);
@@ -66,23 +67,30 @@ export default function Chat({ tipo, idReferencia, idUsuarioActual, titulo }) {
     const usuarioStorage = JSON.parse(localStorage.getItem('usuario'));
     const nombreActual = usuarioStorage?.nombre || usuarioStorage?.nombreCompleto || "Usuario";
 
+    const payload = {
+      idReportante: idUsuarioActual,
+      nombreReportante: nombreActual,
+      idReportado: modalReporte.idReportado,
+      nombreReportado: modalReporte.nombreReportado,
+      motivo: motivoReporte
+    };
+
+    if (tipo === 'INTERCAMBIO') {
+      payload.idSolicitud = idReferencia;
+    }
+
     fetch('http://localhost:8080/api/reportes', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({
-        idReportante: idUsuarioActual,
-        nombreReportante: nombreActual,
-        idReportado: modalReporte.idReportado,
-        nombreReportado: modalReporte.nombreReportado,
-        motivo: motivoReporte
-      })
+      body: JSON.stringify(payload)
     }).then(() => {
       setModalReporte(null);
       setMotivoReporte('');
-      alert('Reporte enviado correctamente al administrador.');
+      alert('Reporte enviado al administrador. El chat ha sido bloqueado preventivamente.');
+      window.location.reload();
     });
   };
 
@@ -151,20 +159,26 @@ export default function Chat({ tipo, idReferencia, idUsuarioActual, titulo }) {
           <div ref={bottomRef} />
         </div>
 
-        <form onSubmit={enviar} style={{ display: 'flex', gap: '8px', padding: '10px', borderTop: '1px solid #e0e0e0', backgroundColor: '#fff' }}>
-          <input
-              type="text"
-              value={texto}
-              onChange={e => setTexto(e.target.value)}
-              placeholder="Escribe un mensaje..."
-              style={{ flex: 1, padding: '8px 12px', borderRadius: '20px', border: '1px solid #ccc', fontSize: '0.9rem', outline: 'none' }}
-          />
-          <button type="submit" style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#2e7d32', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18" height="18">
-              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-            </svg>
-          </button>
-        </form>
+        {estaBloqueado ? (
+            <div style={{ padding: '12px', textAlign: 'center', backgroundColor: '#ffebee', color: '#c62828', fontSize: '0.9rem', fontWeight: 'bold', borderTop: '1px solid #e0e0e0' }}>
+              🚫 Este chat ha sido bloqueado temporalmente debido a un reporte de abuso.
+            </div>
+        ) : (
+            <form onSubmit={enviar} style={{ display: 'flex', gap: '8px', padding: '10px', borderTop: '1px solid #e0e0e0', backgroundColor: '#fff' }}>
+              <input
+                  type="text"
+                  value={texto}
+                  onChange={e => setTexto(e.target.value)}
+                  placeholder="Escribe un mensaje..."
+                  style={{ flex: 1, padding: '8px 12px', borderRadius: '20px', border: '1px solid #ccc', fontSize: '0.9rem', outline: 'none' }}
+              />
+              <button type="submit" style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#2e7d32', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18" height="18">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+              </button>
+            </form>
+        )}
       </div>
   );
 }

@@ -5,6 +5,9 @@ import com.proyecto.backend.model.Usuario;
 import com.proyecto.backend.repository.ArticuloRepository;
 import com.proyecto.backend.repository.UsuarioRepository;
 import com.proyecto.backend.service.EmailService;
+import com.proyecto.backend.repository.SolicitudRepository;
+import com.proyecto.backend.repository.MensajeRepository;
+import com.proyecto.backend.model.Solicitud;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +32,12 @@ public class UsuarioController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private SolicitudRepository solicitudRepository;
+
+    @Autowired
+    private MensajeRepository mensajeRepository;
 
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarPerfil(@PathVariable Long id, @RequestBody Usuario datosActualizados) {
@@ -103,12 +112,33 @@ public class UsuarioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarCuenta(@PathVariable Long id) {
         if (usuarioRepository.existsById(id)) {
+            // 1. Eliminar artículos del usuario
             List<Articulo> articulosDelUsuario = articuloRepository.findByIdUsuarioPropietario(id);
             if (!articulosDelUsuario.isEmpty()) {
                 articuloRepository.deleteAll(articulosDelUsuario);
             }
+
+            // 2. Encontrar todas las solicitudes (compras y ventas) del usuario
+            List<Solicitud> compras = solicitudRepository.findByIdUsuarioSolicitanteOrderByFechaDesc(id);
+            List<Solicitud> ventas = solicitudRepository.findByIdUsuarioPropietarioOrderByFechaDesc(id);
+
+            // 3. Borrar los mensajes (el chat) y luego la solicitud para que desaparezca para ambos
+            for(Solicitud s : compras) {
+                mensajeRepository.deleteByIdReferenciaAndTipo(s.getIdSolicitud(), "INTERCAMBIO");
+                solicitudRepository.delete(s);
+            }
+            for(Solicitud s : ventas) {
+                mensajeRepository.deleteByIdReferenciaAndTipo(s.getIdSolicitud(), "INTERCAMBIO");
+                solicitudRepository.delete(s);
+            }
+
+            // 4. Borrar mensajes de soporte del usuario
+            mensajeRepository.deleteByIdReferenciaAndTipo(id, "SOPORTE");
+
+            // 5. Finalmente, eliminar el usuario
             usuarioRepository.deleteById(id);
-            return ResponseEntity.ok(Map.of("mensaje", "Cuenta y artículos eliminados exitosamente."));
+
+            return ResponseEntity.ok(Map.of("mensaje", "Cuenta, artículos y chats eliminados exitosamente."));
         }
         return ResponseEntity.notFound().build();
     }

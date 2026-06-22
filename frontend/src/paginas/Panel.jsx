@@ -263,6 +263,7 @@ export default function Panel({ usuario }) {
                     ENTREGADO:  { color: '#6a1b9a', bg: '#f3e5f5', label: 'Entregado — confirma que lo recibiste' },
                     COMPLETADA: { color: '#2e7d32', bg: '#e8f5e9', label: 'Intercambio completado' },
                     RECHAZADA:  { color: '#c62828', bg: '#ffebee', label: 'Solicitud rechazada' },
+                    BLOQUEADO:  { color: '#c62828', bg: '#ffebee', label: 'Chat Bloqueado' },
                   };
                   const c = config[s.estado] || config.PENDIENTE;
                   return (
@@ -309,6 +310,7 @@ export default function Panel({ usuario }) {
                     ENTREGADO:  { color: '#6a1b9a', bg: '#f3e5f5', label: 'Entregado' },
                     COMPLETADA: { color: '#2e7d32', bg: '#e8f5e9', label: 'Completada' },
                     RECHAZADA:  { color: '#c62828', bg: '#ffebee', label: 'Rechazada' },
+                    BLOQUEADO:  { color: '#c62828', bg: '#ffebee', label: 'Chat Bloqueado' },
                   };
                   const c = config[s.estado] || config.PENDIENTE;
                   return (
@@ -353,13 +355,14 @@ export default function Panel({ usuario }) {
                               ¡Intercambio completado exitosamente!
                             </p>
                         )}
-                        {['ACEPTADA', 'ENTREGADO', 'COMPLETADA'].includes(s.estado) && (
+                        {['ACEPTADA', 'ENTREGADO', 'COMPLETADA', 'BLOQUEADO'].includes(s.estado) && (
                             <div style={{ marginTop: '12px' }}>
                               <Chat
                                   tipo="INTERCAMBIO"
                                   idReferencia={s.idSolicitud}
                                   idUsuarioActual={usuarioId}
-                                  titulo={`Chat — ${s.tituloArticulo}`}
+                                  titulo={`Chat - ${s.tituloArticulo}`}
+                                  estadoSolicitud={s.estado}
                               />
                             </div>
                         )}

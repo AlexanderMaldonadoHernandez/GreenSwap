@@ -7,30 +7,14 @@ export default function Registro() {
   const [nombre, setNombre] = useState('');
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
-  const [tel, setTel] = useState('');
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  const manejarTelefono = (e) => {
-    // Elimina todo lo que no sea número
-    const soloNumeros = e.target.value.replace(/\D/g, '');
-
-    // Limita a 10 dígitos
-    if (soloNumeros.length <= 10) {
-      setTel(soloNumeros);
-    }
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-
-    if (tel.length !== 10) {
-      setError('El teléfono celular debe tener exactamente 10 dígitos.');
-      return;
-    }
 
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres.');
@@ -43,8 +27,7 @@ export default function Registro() {
       body: JSON.stringify({
         nombreCompleto: nombre,
         correoElectronico: correo,
-        passwordHash: password,
-        telefonoContacto: tel
+        passwordHash: password
       })
     })
       .then(async res => {
@@ -138,22 +121,6 @@ export default function Registro() {
               disabled={!!success}
               minLength="6"
             />
-          </div>
-
-          <div className="form-group">
-            <label>Teléfono Celular:</label>
-            <input
-              type="tel"
-              value={tel}
-              onChange={manejarTelefono}
-              placeholder="5512345678"
-              maxLength="10"
-              required
-              disabled={!!success}
-            />
-            <small style={{ color: '#666' }}>
-              Debe contener exactamente 10 dígitos.
-            </small>
           </div>
 
           <button

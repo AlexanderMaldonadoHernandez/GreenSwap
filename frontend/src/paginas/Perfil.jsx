@@ -9,7 +9,6 @@ export default function Perfil({ usuario, setUsuario }) {
     const [editando, setEditando] = useState(false);
     const [nombre, setNombre] = useState(usuario?.nombre || usuario?.nombreCompleto || '');
     const [correo, setCorreo] = useState(usuario?.correo || usuario?.correoElectronico || '');
-    const [telefono, setTelefono] = useState(usuario?.telefonoContacto || usuario?.telefono || '');
 
     const [mostrarModalPass, setMostrarModalPass] = useState(false);
     const [passActual, setPassActual] = useState('');
@@ -21,25 +20,12 @@ export default function Perfil({ usuario, setUsuario }) {
     const [error, setError] = useState('');
     const [cargando, setCargando] = useState(false);
 
-    const handleTelefonoChange = (e) => {
-        const soloNumeros = e.target.value.replace(/\D/g, '');
-        if (soloNumeros.length <= 10) {
-            setTelefono(soloNumeros);
-        }
-    };
-
     const handleGuardar = (e) => {
         e.preventDefault();
         setMensaje(''); setError(''); setCargando(true);
 
         if (!idToUse) {
             setError('Error interno: No se pudo localizar el ID del usuario.');
-            setCargando(false);
-            return;
-        }
-
-        if (telefono && telefono.length > 0 && telefono.length !== 10) {
-            setError('El teléfono celular debe contener exactamente 10 dígitos.');
             setCargando(false);
             return;
         }
@@ -52,8 +38,7 @@ export default function Perfil({ usuario, setUsuario }) {
             },
             body: JSON.stringify({
                 nombreCompleto: nombre,
-                correoElectronico: correo,
-                telefonoContacto: telefono
+                correoElectronico: correo
             })
         })
             .then(async res => {
@@ -75,7 +60,7 @@ export default function Perfil({ usuario, setUsuario }) {
                     return;
                 }
 
-                const usuarioActualizado = { ...usuario, nombre, correo, telefonoContacto: telefono };
+                const usuarioActualizado = { ...usuario, nombre, correo };
                 setUsuario(usuarioActualizado);
                 localStorage.setItem('usuario', JSON.stringify(usuarioActualizado));
 
@@ -210,18 +195,6 @@ export default function Perfil({ usuario, setUsuario }) {
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label>Teléfono Celular:</label>
-                        <input
-                            type="text"
-                            value={telefono}
-                            onChange={handleTelefonoChange}
-                            disabled={!editando || cargando}
-                            required
-                            placeholder="5512345678"
-                        />
-                    </div>
-
                     {editando ? (
                         <div style={{ display: 'flex', gap: '10px', marginTop: '1.5rem' }}>
                             <button key="btn-guardar" type="submit" className="btn" style={{ flex: 1 }} disabled={cargando}>
@@ -230,7 +203,6 @@ export default function Perfil({ usuario, setUsuario }) {
                             <button key="btn-cancelar" type="button" className="btn" style={{ flex: 1, backgroundColor: '#757575' }} onClick={() => {
                                 setNombre(usuario?.nombre || usuario?.nombreCompleto || '');
                                 setCorreo(usuario?.correo || usuario?.correoElectronico || '');
-                                setTelefono(usuario?.telefonoContacto || usuario?.telefono || '');
                                 setError('');
                                 setEditando(false);
                             }} disabled={cargando}>

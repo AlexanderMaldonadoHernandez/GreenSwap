@@ -49,7 +49,6 @@ public class UsuarioController {
 
             // Actualizamos los campos básicos permitidos
             usuarioExistente.setNombreCompleto(datosActualizados.getNombreCompleto());
-            usuarioExistente.setTelefonoContacto(datosActualizados.getTelefonoContacto());
 
             // Validamos si quiere cambiar el correo y si el nuevo ya está en uso
             if(!usuarioExistente.getCorreoElectronico().equals(datosActualizados.getCorreoElectronico())) {

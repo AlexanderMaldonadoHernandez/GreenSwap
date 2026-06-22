@@ -313,7 +313,6 @@ export default function PanelAdmin() {
                     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                       <h4 style={{ margin: '0 0 5px 0', color: '#1f3b57' }}>{u.nombreCompleto || u.nombre}</h4>
                       <p style={{ margin: 0, fontSize: '0.85rem', color: '#555' }}><strong>Correo:</strong> {u.correoElectronico || u.correo}</p>
-                      <p style={{ margin: 0, fontSize: '0.85rem', color: '#555' }}><strong>Número:</strong> {u.telefonoContacto || 'No registrado'}</p>
                       <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                   <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', backgroundColor: u.rol === 'ADMIN' ? '#e3f2fd' : '#f5f5f5', color: u.rol === 'ADMIN' ? '#1565c0' : '#666', fontWeight: 'bold' }}>
                     Rol: {u.rol || 'USER'}

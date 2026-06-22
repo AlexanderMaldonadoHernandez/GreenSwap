@@ -12,7 +12,6 @@ public class Usuario {
     @Column(unique = true)
     private String correoElectronico;
     private String passwordHash;
-    private String telefonoContacto;
     private String rol = "USUARIO";
     @Column(length = 6)
     private String codigoRecuperacion;
@@ -27,8 +26,6 @@ public class Usuario {
     public void setCorreoElectronico(String e) { this.correoElectronico = e; }
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String p) { this.passwordHash = p; }
-    public String getTelefonoContacto() { return telefonoContacto; }
-    public void setTelefonoContacto(String t) { this.telefonoContacto = t; }
     public String getRol() { return rol; }
     public void setRol(String r) { this.rol = r; }
     public String getCodigoRecuperacion() { return codigoRecuperacion; }

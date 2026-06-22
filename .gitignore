@@ -1,3 +1,6 @@
 ### IntelliJ IDEA y VS Code###
 .idea
 .vscode
+
+uploads/*
+!uploads/.gitkeep

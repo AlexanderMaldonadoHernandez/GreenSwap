@@ -96,4 +96,19 @@ public class SolicitudController {
             return ResponseEntity.ok(solicitudRepository.save(s));
         }).orElse(ResponseEntity.notFound().build());
     }
+
+    @PutMapping("/{id}/calificar")
+    public ResponseEntity<?> calificar(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        return solicitudRepository.findById(id).map(s -> {
+            if (!s.getEstado().equals("COMPLETADA"))
+                return ResponseEntity.badRequest().body(Map.of("mensaje", "Solo puedes calificar intercambios completados."));
+            if (s.getCalificacion() != null)
+                return ResponseEntity.badRequest().body(Map.of("mensaje", "Ya calificaste este intercambio."));
+            int estrellas = Integer.parseInt(body.get("calificacion").toString());
+            if (estrellas < 1 || estrellas > 5)
+                return ResponseEntity.badRequest().body(Map.of("mensaje", "La calificación debe ser entre 1 y 5."));
+            s.setCalificacion(estrellas);
+            return ResponseEntity.ok(solicitudRepository.save(s));
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }

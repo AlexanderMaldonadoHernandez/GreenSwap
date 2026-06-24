@@ -11,6 +11,7 @@ export default function CatalogoMapa() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [mensajeSolicitud, setMensajeSolicitud] = useState('');
+  const [infoVendedores, setInfoVendedores] = useState({});
 
   const usuario = (() => { try { return JSON.parse(localStorage.getItem('usuario')); } catch { return null; } })();
 
@@ -66,6 +67,19 @@ export default function CatalogoMapa() {
           setCargando(false);
         });
   }, [cat, proximidad, busquedaActiva]);
+
+  useEffect(() => {
+    const idsUnicos = [...new Set(articulos.map(a => a.idUsuarioPropietario).filter(Boolean))];
+    idsUnicos.forEach(id => {
+      if (infoVendedores[id]) return;
+      fetch(`http://localhost:8080/api/usuarios/${id}/calificacion`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data) setInfoVendedores(prev => ({ ...prev, [id]: data }));
+        })
+        .catch(() => {});
+    });
+  }, [articulos]);
 
   const manejarErrorImagen = (e) => {
     e.target.src = imagenDefault;
@@ -182,14 +196,26 @@ export default function CatalogoMapa() {
               onSubmit={e => { e.preventDefault(); setBusquedaActiva(busqueda); setCat(''); setProximidad(false); }}
               style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
           >
-            <input
-                type="text"
-                value={busqueda}
-                onChange={e => { setBusqueda(e.target.value); if (!e.target.value) setBusquedaActiva(''); }}
-                placeholder="Buscar artículo..."
-                style={{ height: '38px', padding: '0 12px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '0.9rem', width: '180px', boxSizing: 'border-box' }}
-            />
-            <button type="submit" className="btn" style={{ height: '38px', padding: '0 16px', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Buscar</button>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <input
+                  type="text"
+                  value={busqueda}
+                  onChange={e => { setBusqueda(e.target.value); if (!e.target.value) setBusquedaActiva(''); }}
+                  placeholder="Buscar artículo..."
+                  style={{ height: '38px', padding: '0 40px 0 12px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '0.9rem', width: '220px', boxSizing: 'border-box' }}
+              />
+              <button type="submit" style={{
+                position: 'absolute', right: '4px',
+                height: '30px', width: '30px',
+                background: '#2e7d32', border: 'none', borderRadius: '6px',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: 0
+              }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </button>
+            </div>
 
             <select
                 value={cat}
@@ -297,16 +323,30 @@ export default function CatalogoMapa() {
                   </span>
                       </div>
 
-                      <p
-                          style={{
-                            fontSize: '0.95rem',
-                            color: '#555',
-                            margin: '12px 0',
-                            lineHeight: '1.4'
-                          }}
-                      >
+                      <p style={{ fontSize: '0.95rem', color: '#555', margin: '12px 0', lineHeight: '1.4' }}>
                         {art.descripcionDetallada || 'Sin descripción disponible.'}
                       </p>
+
+                      {infoVendedores[art.idUsuarioPropietario] && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0', borderTop: '1px solid #f0f0f0', marginTop: '4px' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#2e7d32', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                          </div>
+                          <div>
+                            <p style={{ margin: 0, fontSize: '0.78rem', fontWeight: 600, color: '#374151' }}>
+                              {infoVendedores[art.idUsuarioPropietario].nombre}
+                            </p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                              {[1,2,3,4,5].map(i => (
+                                <span key={i} style={{ fontSize: '0.75rem', color: i <= Math.round(infoVendedores[art.idUsuarioPropietario].promedio) ? '#f59e0b' : '#d1d5db' }}>★</span>
+                              ))}
+                              <span style={{ fontSize: '0.72rem', color: '#9ca3af', marginLeft: '2px' }}>
+                                ({infoVendedores[art.idUsuarioPropietario].total})
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <button className="btn" onClick={() => handleMeInteresa(art)}>

@@ -45,8 +45,8 @@ export default function Login({ setUsuario}) {
   };
 
   return (
-      <div className="container" style={{ maxWidth: '400px', marginTop: '4rem' }}>
-        <div className="card">
+      <div className="fondo-dinamico">
+        <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
           <h2 style={{ textAlign: 'center', color: '#2e7d32', marginTop: 0 }}>Iniciar Sesión</h2>
 
           {/* Renderizado condicional del mensaje de error */}

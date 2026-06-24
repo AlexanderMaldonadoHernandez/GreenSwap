@@ -146,4 +146,20 @@ public class UsuarioController {
     public ResponseEntity<List<Usuario>> obtenerTodos() {
         return ResponseEntity.ok(usuarioRepository.findAll());
     }
+
+    @GetMapping("/{id}/calificacion")
+    public ResponseEntity<?> calificacion(@PathVariable Long id) {
+        return usuarioRepository.findById(id).map(u -> {
+            List<Solicitud> calificadas = solicitudRepository.findByIdUsuarioPropietarioAndCalificacionIsNotNull(id);
+            double promedio = calificadas.stream()
+                .mapToInt(Solicitud::getCalificacion)
+                .average()
+                .orElse(0.0);
+            return ResponseEntity.ok(Map.of(
+                "nombre", u.getNombreCompleto(),
+                "promedio", Math.round(promedio * 10.0) / 10.0,
+                "total", calificadas.size()
+            ));
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }

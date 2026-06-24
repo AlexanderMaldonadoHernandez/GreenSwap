@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Perfil({ usuario, setUsuario }) {
@@ -19,6 +19,15 @@ export default function Perfil({ usuario, setUsuario }) {
     const [mensaje, setMensaje] = useState('');
     const [error, setError] = useState('');
     const [cargando, setCargando] = useState(false);
+    const [calificacionInfo, setCalificacionInfo] = useState(null);
+
+    useEffect(() => {
+        if (!idToUse) return;
+        fetch(`http://localhost:8080/api/usuarios/${idToUse}/calificacion`)
+            .then(r => r.ok ? r.json() : null)
+            .then(data => { if (data) setCalificacionInfo(data); })
+            .catch(() => {});
+    }, [idToUse]);
 
     const handleGuardar = (e) => {
         e.preventDefault();
@@ -165,9 +174,28 @@ export default function Perfil({ usuario, setUsuario }) {
     };
 
     return (
-        <div className="container" style={{ maxWidth: '500px', marginTop: '4rem', position: 'relative' }}>
+        <div className="fondo-dinamico" style={{ alignItems: 'flex-start', paddingTop: '2rem' }}>
+        <div style={{ width: '100%', maxWidth: '500px' }}>
             <div className="card">
-                <h2 style={{ textAlign: 'center', color: '#2e7d32', marginTop: 0 }}>Mi Perfil</h2>
+                {/* Header de perfil */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #f0f0f0' }}>
+                    <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#2e7d32', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                    </div>
+                    <div>
+                        <h2 style={{ margin: '0 0 4px 0', color: '#1f3b57', fontSize: '1.3rem' }}>
+                            {nombre}
+                        </h2>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            {[1,2,3,4,5].map(i => (
+                                <span key={i} style={{ fontSize: '1.1rem', color: i <= Math.round(calificacionInfo?.promedio || 0) ? '#f59e0b' : '#d1d5db' }}>★</span>
+                            ))}
+                            <span style={{ fontSize: '0.82rem', color: '#9ca3af', marginLeft: '4px' }}>
+                                {calificacionInfo ? `${calificacionInfo.promedio} (${calificacionInfo.total} reseñas)` : 'Sin calificaciones aún'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
                 {error && <div style={{ backgroundColor: '#ffebee', color: '#c62828', padding: '10px', borderRadius: '5px', marginBottom: '15px', textAlign: 'center', fontSize: '0.9rem' }}>{error}</div>}
                 {mensaje && <div style={{ backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '10px', borderRadius: '5px', marginBottom: '15px', textAlign: 'center', fontSize: '0.9rem' }}>{mensaje}</div>}
@@ -255,6 +283,7 @@ export default function Perfil({ usuario, setUsuario }) {
                     </button>
                 </div>
             </div>
+        </div>
 
             {/* POP-UP Modal para Cambiar Contraseña */}
             {mostrarModalPass && (

@@ -14,4 +14,5 @@ public interface SolicitudRepository extends JpaRepository<Solicitud, Long> {
     Optional<Solicitud> findByIdArticuloAndIdUsuarioSolicitante(Long idArticulo, Long idUsuarioSolicitante);
     List<Solicitud> findAllByOrderByFechaDesc();
     List<Solicitud> findByEstadoOrderByFechaDesc(String estado);
+    List<Solicitud> findByIdUsuarioPropietarioAndCalificacionIsNotNull(Long idUsuarioPropietario);
 }

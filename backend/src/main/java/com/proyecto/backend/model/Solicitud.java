@@ -15,6 +15,7 @@ public class Solicitud {
     private Long idUsuarioPropietario;
     private LocalDateTime fecha = LocalDateTime.now();
     private String estado = "PENDIENTE";
+    private Integer calificacion;
 
     public Solicitud() {}
     public Long getIdSolicitud() { return idSolicitud; }
@@ -31,4 +32,6 @@ public class Solicitud {
     public void setFecha(LocalDateTime f) { this.fecha = f; }
     public String getEstado() { return estado; }
     public void setEstado(String e) { this.estado = e; }
+    public Integer getCalificacion() { return calificacion; }
+    public void setCalificacion(Integer c) { this.calificacion = c; }
 }

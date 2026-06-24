@@ -1,4 +1,26 @@
 import { useState, useEffect, useCallback } from 'react';
+
+function Estrellas({ valor, onSeleccionar, solo }) {
+  const [hover, setHover] = useState(0);
+  return (
+    <div style={{ display: 'flex', gap: '2px' }}>
+      {[1,2,3,4,5].map(i => (
+        <span
+          key={i}
+          onClick={() => !solo && onSeleccionar && onSeleccionar(i)}
+          onMouseEnter={() => !solo && setHover(i)}
+          onMouseLeave={() => !solo && setHover(0)}
+          style={{
+            fontSize: solo ? '1rem' : '1.4rem',
+            cursor: solo ? 'default' : 'pointer',
+            color: i <= (hover || valor) ? '#f59e0b' : '#d1d5db',
+            transition: 'color 0.1s'
+          }}
+        >★</span>
+      ))}
+    </div>
+  );
+}
 import Chat from '../components/Chat';
 
 export default function Panel({ usuario }) {
@@ -66,6 +88,14 @@ export default function Panel({ usuario }) {
         .catch(() => setVentas([]));
   };
 
+  const calificar = (idSolicitud, estrellas) => {
+    fetch(`http://localhost:8080/api/solicitudes/${idSolicitud}/calificar`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ calificacion: estrellas })
+    }).then(() => cargarCompras());
+  };
+
   const responderVenta = (idSolicitud, accion) => {
     fetch(`http://localhost:8080/api/solicitudes/${idSolicitud}/${accion}`, {
       method: 'PUT',
@@ -110,12 +140,15 @@ export default function Panel({ usuario }) {
         },
         body: JSON.stringify(nuevo)
       })
-          .then(res => {
-            if (!res.ok) throw new Error('El artículo no se pudo guardar');
+          .then(async res => {
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.mensaje || `Error del servidor: ${res.status}`);
+            }
             return res.json();
           })
           .then(() => {
-            setMensaje('¡Artículo publicado con éxito!');
+            setMensaje('¡Artículo publicado con éxito! Quedará visible tras la aprobación del administrador.');
             setTitulo('');
             setDesc('');
             setImgUrl('');
@@ -123,27 +156,22 @@ export default function Panel({ usuario }) {
           })
           .catch(error => {
             console.error(error);
-            setError('No se pudo publicar el artículo. Verifica que la URL de la imagen sea válida e inténtalo de nuevo.');
+            setError(error.message || 'No se pudo publicar el artículo. Verifica tu conexión e inténtalo de nuevo.');
           });
     };
 
     if (!navigator.geolocation) {
-      setError('Tu navegador no soporta geolocalización. Usando ubicación predeterminada.');
-      // Coordenadas de Zacatenco por defecto si no hay soporte
       enviarArticulo(19.5046, -99.1467);
     } else {
-      setMensaje('Obteniendo tu ubicación exacta para publicar...');
-
+      setMensaje('Obteniendo tu ubicación...');
       navigator.geolocation.getCurrentPosition(
           (pos) => {
             enviarArticulo(pos.coords.latitude, pos.coords.longitude);
           },
-          (err) => {
-            setError('No se pudo obtener la ubicación (Permiso denegado o error). Usando ubicación por defecto.');
-            // Coordenadas de Zacatenco por defecto si bloquean el permiso
+          () => {
             enviarArticulo(19.5046, -99.1467);
           },
-          { enableHighAccuracy: true, timeout: 10000 }
+          { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
       );
     }
   };
@@ -305,6 +333,21 @@ export default function Panel({ usuario }) {
                             <button className="btn" style={{ width: '100%', marginTop: '10px' }} onClick={() => responderVenta(s.idSolicitud, 'recibido')}>
                               Confirmar que lo recibí
                             </button>
+                        )}
+                        {s.estado === 'COMPLETADA' && (
+                            <div style={{ marginTop: '10px', padding: '10px', background: '#f9fafb', borderRadius: '8px' }}>
+                              {s.calificacion ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>Tu calificación:</span>
+                                  <Estrellas valor={s.calificacion} solo />
+                                </div>
+                              ) : (
+                                <div>
+                                  <p style={{ margin: '0 0 6px 0', fontSize: '0.85rem', color: '#374151', fontWeight: 600 }}>¿Cómo calificarías al vendedor?</p>
+                                  <Estrellas onSeleccionar={e => calificar(s.idSolicitud, e)} valor={0} />
+                                </div>
+                              )}
+                            </div>
                         )}
                         {['ACEPTADA', 'ENTREGADO', 'COMPLETADA'].includes(s.estado) && (
                             <div style={{ marginTop: '12px' }}>

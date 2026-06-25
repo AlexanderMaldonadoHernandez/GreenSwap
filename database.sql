@@ -1,11 +1,10 @@
 -- 1. POPULAR USUARIOS
--- La contraseña para todas las cuentas es: 123456
+-- La contraseña para todas las cuentas es: qwerty
 INSERT INTO usuarios (nombre_completo, correo_electronico, password_hash, rol, cuenta_activa) VALUES
-                                                                                                  ('Admin GreenSwap', 'admin@greenswap.com', '$2a$10$7EqJtq98hPqEX7fNZaSQjeV2w2.LIfPGE7b2a6/1K2/U0rR.e13qW', 'ADMIN', true),
-                                                                                                  ('Juan Pérez', 'juan@ipn.mx', '$2a$10$7EqJtq98hPqEX7fNZaSQjeV2w2.LIfPGE7b2a6/1K2/U0rR.e13qW', 'USUARIO', true),
-                                                                                                  ('María González', 'maria@ipn.mx', '$2a$10$7EqJtq98hPqEX7fNZaSQjeV2w2.LIfPGE7b2a6/1K2/U0rR.e13qW', 'USUARIO', true),
-                                                                                                  ('Carlos López', 'carlos@ipn.mx', '$2a$10$7EqJtq98hPqEX7fNZaSQjeV2w2.LIfPGE7b2a6/1K2/U0rR.e13qW', 'USUARIO', true);
-
+                                                                                                  ('Admin GreenSwap', 'admin@greenswap.com', '$2a$10$FrygU2M02Z.Q4BdRk1ibc.060HTUd2CmWDY/J9ybPifVLFctufMwO', 'ADMIN', true),
+                                                                                                  ('Juan Pérez', 'juan@ipn.mx', '$2a$10$FrygU2M02Z.Q4BdRk1ibc.060HTUd2CmWDY/J9ybPifVLFctufMwO', 'USUARIO', true),
+                                                                                                  ('María González', 'maria@ipn.mx', '$2a$10$FrygU2M02Z.Q4BdRk1ibc.060HTUd2CmWDY/J9ybPifVLFctufMwO', 'USUARIO', true),
+                                                                                                  ('Carlos López', 'carlos@ipn.mx', '$2a$10$FrygU2M02Z.Q4BdRk1ibc.060HTUd2CmWDY/J9ybPifVLFctufMwO', 'USUARIO', true);
 
 -- 2. POPULAR ARTÍCULOS
 -- Categorías: 1:Electrodomésticos, 2:Muebles, 3:Deportes, 4:Cocina, 5:Decoración
@@ -43,3 +42,39 @@ INSERT INTO solicitudes (id_articulo, titulo_articulo, id_usuario_solicitante, i
 -- Carlos le pidió a Juan el microondas, y el intercambio ya se completó
 INSERT INTO solicitudes (id_articulo, titulo_articulo, id_usuario_solicitante, id_usuario_propietario, fecha, estado) VALUES
     (1, 'Microondas LG', 4, 2, DATE_SUB(NOW(), INTERVAL 2 DAY), 'COMPLETADA');
+
+-- 4. POPULAR CHATS (MENSAJES)
+-- Chat de Intercambio 1 (Pendiente: Juan solicita la Silla de María - id_solicitud = 1)
+INSERT INTO mensajes (id_remitente, nombre_remitente, contenido, fecha, tipo, id_referencia) VALUES
+                                                                                                 (2, 'Juan Pérez', 'Hola María, me interesa mucho la silla de oficina. ¿Aún la tienes disponible?', DATE_SUB(NOW(), INTERVAL 1 DAY), 'INTERCAMBIO', 1),
+                                                                                                 (3, 'María González', 'Hola Juan, sí, todavía la tengo. ¿Cuándo podrías pasar por ella?', DATE_SUB(NOW(), INTERVAL 23 HOUR), 'INTERCAMBIO', 1),
+                                                                                                 (2, 'Juan Pérez', 'Podría pasar mañana saliendo de mis clases cerca de Lindavista, ¿te queda bien?', DATE_SUB(NOW(), INTERVAL 22 HOUR), 'INTERCAMBIO', 1);
+
+-- Chat de Intercambio 2 (Completada: Carlos le pidió el Microondas a Juan - id_solicitud = 2)
+INSERT INTO mensajes (id_remitente, nombre_remitente, contenido, fecha, tipo, id_referencia) VALUES
+                                                                                                 (4, 'Carlos López', '¡Qué tal Juan! Ya estoy afuera de ESCOM para hacer el intercambio del microondas.', DATE_SUB(NOW(), INTERVAL 3 DAY), 'INTERCAMBIO', 2),
+                                                                                                 (2, 'Juan Pérez', 'Perfecto Carlos, voy bajando con el microondas. Llevo playera azul.', DATE_SUB(NOW(), INTERVAL 3 DAY), 'INTERCAMBIO', 2),
+                                                                                                 (4, 'Carlos López', 'Ya te vi, gracias. ¡Funciona perfecto!', DATE_SUB(NOW(), INTERVAL 2 DAY), 'INTERCAMBIO', 2);
+
+-- 5. POPULAR REVIEWS (CALIFICACIONES EN SOLICITUDES)
+-- Solo se pueden calificar solicitudes con estado 'COMPLETADA'.
+-- En tus datos base, la solicitud 2 (Microondas) ya está completada.
+
+-- Carlos califica a Juan por el intercambio del Microondas (5 estrellas)
+UPDATE solicitudes
+SET calificacion = 5
+WHERE id_solicitud = 2;
+
+-- 6. POPULAR REPORTES
+
+-- Reporte 1: Juan reporta a Carlos (Estado: PENDIENTE, para ver en el panel de admin)
+INSERT INTO reportes (id_reportante, nombre_reportante, id_reportado, nombre_reportado, motivo, estado, fecha) VALUES
+    (2, 'Juan Pérez', 4, 'Carlos López', 'El usuario se mostró insistente y agresivo en otro intercambio que cancelé.', 'PENDIENTE', DATE_SUB(NOW(), INTERVAL 12 HOUR));
+
+-- Reporte 2: María reporta un comportamiento anómalo de Juan (Estado: IGNORADO, el admin ya lo revisó)
+INSERT INTO reportes (id_reportante, nombre_reportante, id_reportado, nombre_reportado, motivo, estado, fecha) VALUES
+    (3, 'María González', 2, 'Juan Pérez', 'Publicó un artículo que parece ser falso o engañoso.', 'IGNORADO', DATE_SUB(NOW(), INTERVAL 5 DAY));
+
+-- Reporte 3: Carlos reporta a un usuario (hipotético/prueba) (Estado: SANCIONADO)
+INSERT INTO reportes (id_reportante, nombre_reportante, id_reportado, nombre_reportado, motivo, estado, fecha) VALUES
+    (4, 'Carlos López', 3, 'María González', 'Me canceló el intercambio en el último minuto cuando ya estaba en el punto de encuentro.', 'SANCIONADO', DATE_SUB(NOW(), INTERVAL 10 DAY));

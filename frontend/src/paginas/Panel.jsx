@@ -190,7 +190,7 @@ export default function Panel({ usuario }) {
   };
 
   return (
-      <div className="container" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+      <div className="container" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <div className="card" style={{ flex: '1', minWidth: '300px' }}>
           <h2 style={{ color: '#2e7d32', marginTop: 0 }}>Publicar un artículo</h2>
 
